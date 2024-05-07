@@ -1,9 +1,9 @@
-openapi: "3.0.0"
+openapi: 3.0.0
 info:
   title: product-service
   version: 0.0.1
 servers:
-  - url: http://localhost:8080/
+  - url: 'http://localhost:8080/'
     description: Dev server
 paths:
   /user/register:
@@ -14,28 +14,28 @@ paths:
       requestBody:
         required: true
         content:
-          'application/json':
+          application/json:
             schema:
-              $ref: "#/components/schemas/user"
+              $ref: '#/components/schemas/user'
       responses:
         '200':
           description: User has been successfully registered
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/ok"
+                $ref: '#/components/schemas/ok'
         '400':
           description: Incorrect data
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '500':
           description: Internal server error
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
   /user/login:
     post:
       summary: User authorization
@@ -44,34 +44,34 @@ paths:
       requestBody:
         required: true
         content:
-          'application/json':
+          application/json:
             schema:
-              $ref: "#/components/schemas/user"
+              $ref: '#/components/schemas/user'
       responses:
         '200':
           description: User successfully authorized
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/token"
+                $ref: '#/components/schemas/token'
         '400':
           description: Incorrect data
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '404':
           description: User is not registered yet
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '500':
           description: Internal server error
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
   /product/add:
     post:
       summary: Creating a new product
@@ -80,16 +80,16 @@ paths:
       requestBody:
         required: true
         content:
-          'application/json':
+          application/json:
             schema:
-              $ref: "#/components/schemas/product"
+              $ref: '#/components/schemas/product'
       security:
         - bearerAuth: []
       responses:
         '201':
           description: Product has been successfully created
           content:
-            'application/json':
+            application/json:
               schema:
                 type: object
                 properties:
@@ -99,21 +99,21 @@ paths:
         '400':
           description: Incorrect data
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '401':
           description: Unauthorized user
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '500':
           description: Internal server error
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
   /products:
     get:
       summary: Getting products
@@ -134,33 +134,35 @@ paths:
           required: false
           schema:
             type: string
-            enum: [last_create, name]
+            enum:
+              - last_create
+              - name
       responses:
         '200':
           description: Products has been successfully received
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/products"
+                $ref: '#/components/schemas/products'
         '400':
           description: Incorrect data
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '401':
           description: Unauthorized user
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '500':
           description: Internal server error
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
-  /product/{id}:
+                $ref: '#/components/schemas/error'
+  '/product/{id}':
     parameters:
       - name: id
         in: path
@@ -178,39 +180,39 @@ paths:
         '200':
           description: Product data has been successfully received
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/product"
+                $ref: '#/components/schemas/product'
         '400':
           description: Incorrect data
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '401':
           description: Unauthorized user
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '403':
           description: User does not have access to this product
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '404':
           description: Product with such id does not exist
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '500':
           description: Internal server error
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
     put:
       summary: Update product by id
       tags:
@@ -221,90 +223,89 @@ paths:
         required: true
         description: New product information
         content:
-          'application/json':
+          application/json:
             schema:
-              $ref: "#/components/schemas/product"
+              $ref: '#/components/schemas/product'
       responses:
         '200':
           description: Product data has been successfully updated
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/product"
+                $ref: '#/components/schemas/product'
         '400':
           description: Incorrect data
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '401':
           description: Unauthorized user
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '403':
           description: User does not have access to this product
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '404':
           description: Product with such id does not exist
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '500':
           description: Internal server error
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
     delete:
       summary: Delete product by id
       tags:
         - Product
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       responses:
         '200':
           description: Product has been successfully deleted
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/ok"
+                $ref: '#/components/schemas/ok'
         '400':
           description: Incorrect data
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '401':
           description: Unauthorized user
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '403':
           description: User does not have access to this product
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '404':
           description: Product with such id does not exist
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: '#/components/schemas/error'
         '500':
           description: Internal server error
           content:
-            'application/json':
+            application/json:
               schema:
-                $ref: "#/components/schemas/error"
-
+                $ref: '#/components/schemas/error'
 components:
   securitySchemes:
     bearerAuth:
@@ -346,13 +347,14 @@ components:
         token:
           type: string
           description: JWT token
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
       required:
         - token
     products:
       type: array
       items:
-        $ref: "#/components/schemas/product"
+        $ref: '#/components/schemas/product'
     product:
       type: object
       properties:
