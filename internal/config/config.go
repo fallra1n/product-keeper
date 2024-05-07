@@ -2,13 +2,19 @@ package config
 
 import (
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
+type HTTPServer struct {
+	Address string        `yaml:"address"`
+	Timeout time.Duration `yaml:"timeout"`
+}
+
 type Config struct {
-	Env  string `yaml:"env"`
-	Port string `yaml:"port"`
+	Env        string `yaml:"env"`
+	HTTPServer `yaml:"http_server"`
 }
 
 func MustLoad() *Config {

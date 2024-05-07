@@ -33,7 +33,7 @@ func (a *app) Run() {
 	})
 
 	a.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%s", a.cfg.Port),
+		Addr:    fmt.Sprintf(a.cfg.HTTPServer.Address),
 		Handler: router,
 	}
 
