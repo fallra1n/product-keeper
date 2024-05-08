@@ -8,13 +8,13 @@ import (
 	"github.com/fallra1n/product-service/internal/http-server/handlers"
 )
 
-func SetupRouter(userHandlers handlers.UserHandler, productHandlers handlers.ProductHandler, logger *slog.Logger) *gin.Engine {
+func SetupRouter(auth handlers.AuthHandler, productHandlers handlers.ProductHandler, logger *slog.Logger) *gin.Engine {
 	router := gin.Default()
 
 	// TODO using custom logger
 
-	router.POST("/user/register", userHandlers.UserRegister)
-	router.POST("/user/login", userHandlers.UserLogin)
+	router.POST("/user/register", auth.UserRegister)
+	router.POST("/user/login", auth.UserLogin)
 	router.POST("/product/add", productHandlers.CreateProduct)
 	router.GET("/products", productHandlers.GetProducts)
 	router.GET("/product/:id", productHandlers.GetProductByID)

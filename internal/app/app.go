@@ -33,10 +33,10 @@ func NewApp(cfg *config.Config, logger *slog.Logger) App {
 }
 
 func (a *app) Run() {
-	uh := handlers.NewUserHandler()
+	ah := handlers.NewAuthHandler()
 	prh := handlers.NewProductHandler()
 
-	router := httpServer.SetupRouter(uh, prh, a.logger)
+	router := httpServer.SetupRouter(ah, prh, a.logger)
 
 	a.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(a.cfg.HTTPServer.Address),
