@@ -12,6 +12,7 @@ import (
 	"github.com/fallra1n/product-service/internal/config"
 	httpServer "github.com/fallra1n/product-service/internal/http-server"
 	"github.com/fallra1n/product-service/internal/http-server/handlers"
+	"github.com/fallra1n/product-service/internal/services"
 )
 
 type App interface {
@@ -33,7 +34,12 @@ func NewApp(cfg *config.Config, logger *slog.Logger) App {
 }
 
 func (a *app) Run() {
-	ah := handlers.NewAuthHandler()
+	// TODO repo layer
+
+	// TODO services layer
+	as := service.NewAuthService()
+
+	ah := handlers.NewAuthHandler(as)
 	prh := handlers.NewProductHandler()
 
 	router := httpServer.SetupRouter(ah, prh, a.logger)
