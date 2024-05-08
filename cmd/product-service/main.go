@@ -5,12 +5,12 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/fallra1n/product-service/internal"
-	"github.com/fallra1n/product-service/pkg/shutdown"
+	"github.com/joho/godotenv"
 
+	"github.com/fallra1n/product-service/internal/app"
 	"github.com/fallra1n/product-service/internal/config"
 	"github.com/fallra1n/product-service/pkg/logging"
-	"github.com/joho/godotenv"
+	"github.com/fallra1n/product-service/pkg/shutdown"
 )
 
 func main() {
@@ -26,14 +26,10 @@ func main() {
 	logger := logging.SetupLogger(cfg.Env)
 
 	logger.Info("creating application")
-	app, err := internal.NewApp(cfg, logger)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+	appl := app.NewApp(cfg, logger)
 
 	logger.Info("running application")
-	go app.Run()
+	go appl.Run()
 
-	shutdown.Graceful([]os.Signal{syscall.SIGINT, syscall.SIGTERM}, app)
+	shutdown.Graceful([]os.Signal{syscall.SIGINT, syscall.SIGTERM}, appl)
 }

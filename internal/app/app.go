@@ -1,4 +1,4 @@
-package internal
+package app
 
 import (
 	"context"
@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/fallra1n/product-service/internal/config"
+	httpServer "github.com/fallra1n/product-service/internal/http-server"
+	"github.com/fallra1n/product-service/internal/http-server/handlers"
 )
 
 type App interface {
@@ -25,19 +25,18 @@ type app struct {
 	httpServer *http.Server
 }
 
-func NewApp(cfg *config.Config, logger *slog.Logger) (App, error) {
+func NewApp(cfg *config.Config, logger *slog.Logger) App {
 	return &app{
 		cfg:    cfg,
 		logger: logger,
-	}, nil
+	}
 }
 
 func (a *app) Run() {
-	router := gin.Default()
-	router.GET("/home", func(c *gin.Context) {
-		time.Sleep(5 * time.Second)
-		c.String(http.StatusOK, "Welcome Gin Server")
-	})
+	uh := handlers.NewUserHandler()
+	prh := handlers.NewProductHandler()
+
+	router := httpServer.SetupRouter(uh, prh, a.logger)
 
 	a.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(a.cfg.HTTPServer.Address),
@@ -46,7 +45,7 @@ func (a *app) Run() {
 
 	go func() {
 		if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			a.logger.Error("error ocurred while running http server: %s", err.Error())
+			a.logger.Error("error ocurred while running http-server server: %s", err.Error())
 			os.Exit(1)
 		}
 	}()
