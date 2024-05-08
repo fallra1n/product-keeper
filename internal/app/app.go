@@ -25,6 +25,13 @@ type app struct {
 	httpServer *http.Server
 }
 
+func NewApp(cfg *config.Config, logger *slog.Logger) (App, error) {
+	return &app{
+		cfg:    cfg,
+		logger: logger,
+	}, nil
+}
+
 func (a *app) Run() {
 	router := gin.Default()
 	router.GET("/home", func(c *gin.Context) {
@@ -50,11 +57,4 @@ func (a *app) Close() error {
 	defer cancel()
 
 	return a.httpServer.Shutdown(ctx)
-}
-
-func NewApp(cfg *config.Config, logger *slog.Logger) (App, error) {
-	return &app{
-		cfg:    cfg,
-		logger: logger,
-	}, nil
 }
