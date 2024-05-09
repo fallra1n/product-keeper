@@ -1,10 +1,12 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 
 	"github.com/fallra1n/product-service/internal/config"
 	"github.com/fallra1n/product-service/internal/domain/models"
@@ -54,6 +56,12 @@ func (s *postgres) CreateUser(user models.User) error {
 		VALUES ($1, $2);`
 
 	if _, err := s.db.Exec(query, user.Name, user.Password); err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" {
+				return storage.ErrUserAlreadyExist
+			}
+		}
+
 		return err
 	}
 
@@ -65,6 +73,9 @@ func (s *postgres) GetPasswordByName(name string) (string, error) {
 
 	var user models.User
 	if err := s.db.Get(&user, query, name); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", storage.ErrUserNotFound
+		}
 		return "", err
 	}
 

@@ -1,6 +1,15 @@
 package storage
 
-import "github.com/fallra1n/product-service/internal/domain/models"
+import (
+	"errors"
+
+	"github.com/fallra1n/product-service/internal/domain/models"
+)
+
+var (
+	ErrUserNotFound     = errors.New("url not found")
+	ErrUserAlreadyExist = errors.New("url exists")
+)
 
 type Users interface {
 	CreateTables() error

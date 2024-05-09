@@ -46,7 +46,7 @@ func (a *app) Run() {
 		os.Exit(1)
 	}
 
-	as := services.NewAuthService(s, a.logger)
+	as := services.NewAuthService(s)
 	ah := handlers.NewAuthHandler(as, a.logger)
 	prh := handlers.NewProductHandler()
 

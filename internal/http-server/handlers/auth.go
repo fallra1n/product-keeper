@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -42,7 +43,7 @@ func (ah *authHandler) UserRegister(c *gin.Context) {
 
 	if err := c.BindJSON(&req); err != nil {
 		ah.logger.Error("UserRegister: " + err.Error())
-		c.JSON(http.StatusBadRequest, DefaultResponse{err.Error()})
+		c.JSON(http.StatusBadRequest, DefaultResponse{"failed to decode request"})
 		return
 	}
 
@@ -50,9 +51,22 @@ func (ah *authHandler) UserRegister(c *gin.Context) {
 		Name:     req.Name,
 		Password: req.Password,
 	})
+
 	if err != nil {
+		if errors.Is(err, services.ErrFailedHashingPassword) {
+			ah.logger.Error("UserRegister: " + err.Error())
+			c.JSON(http.StatusInternalServerError, DefaultResponse{"cannot hash password"})
+			return
+		}
+
+		if errors.Is(err, services.ErrUserAlreadyExist) {
+			ah.logger.Error("UserRegister: " + err.Error())
+			c.JSON(http.StatusBadRequest, DefaultResponse{"username already exists"})
+			return
+		}
+
 		ah.logger.Error("UserRegister: " + err.Error())
-		c.JSON(http.StatusInternalServerError, DefaultResponse{err.Error()})
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
 		return
 	}
 
@@ -65,7 +79,7 @@ func (ah *authHandler) UserLogin(c *gin.Context) {
 
 	if err := c.BindJSON(&req); err != nil {
 		ah.logger.Error("UserLogin: " + err.Error())
-		c.JSON(http.StatusBadRequest, DefaultResponse{err.Error()})
+		c.JSON(http.StatusBadRequest, DefaultResponse{"failed to decode request"})
 		return
 	}
 
@@ -73,9 +87,22 @@ func (ah *authHandler) UserLogin(c *gin.Context) {
 		Name:     req.Name,
 		Password: req.Password,
 	})
+
 	if err != nil {
+		if errors.Is(err, services.ErrIncorrectPassword) {
+			ah.logger.Error("UserLogin: " + err.Error())
+			c.JSON(http.StatusBadRequest, DefaultResponse{"incorrect password"})
+			return
+		}
+
+		if errors.Is(err, services.ErrUserNotFound) {
+			ah.logger.Error("UserLogin: " + err.Error())
+			c.JSON(http.StatusNotFound, DefaultResponse{"user not found"})
+			return
+		}
+
 		ah.logger.Error("UserLogin: " + err.Error())
-		c.JSON(http.StatusInternalServerError, DefaultResponse{err.Error()})
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"cannot hash password"})
 		return
 	}
 
