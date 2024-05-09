@@ -1,55 +1,66 @@
 package services
 
 import (
-	"crypto/sha1"
-	"fmt"
 	"log/slog"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/fallra1n/product-service/internal/domain/models"
-	"github.com/fallra1n/product-service/internal/storage/postgres"
+	"github.com/fallra1n/product-service/internal/storage"
 )
 
 type Auth interface {
 	CreateUser(user models.User) error
+	LoginUser(user models.User) (string, error)
 }
 
 type authService struct {
-	storage *postgres.Storage
+	storage storage.Storage
 	logger  *slog.Logger
 }
 
-func NewAuthService(storage *postgres.Storage, logger *slog.Logger) Auth {
+func NewAuthService(storage storage.Storage, logger *slog.Logger) Auth {
 	return &authService{storage, logger}
 }
 
 func (as *authService) CreateUser(user models.User) error {
+	hash, err := as.hashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+
 	return as.storage.CreateUser(models.User{
 		Name:     user.Name,
-		Password: as.hashPassword(user.Password),
+		Password: hash,
 	})
 }
 
-func (as *authService) hashPassword(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
+func (as *authService) LoginUser(user models.User) (string, error) {
+	hashedPassword, err := as.storage.GetPasswordByName(user.Name)
+	if err != nil {
+		return "", err
+	}
 
-	salt := as.fetchSalt()
-	as.logger.Warn("salt is empty")
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(user.Password)); err != nil {
+		return "", err
+	}
 
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+	return as.generateToken(user.Name)
 }
 
-func (as *authService) fetchSalt() string {
-	return os.Getenv("PASSWORD_SALT")
+func (as *authService) hashPassword(password string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		as.logger.Error("Error hashing password:", err)
+		return "", err
+	}
+
+	return string(hash), nil
 }
 
-func (as *authService) generateToken(username, password string) (string, error) {
-	// TODO verify that the user exists in db
-
+func (as *authService) generateToken(username string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username

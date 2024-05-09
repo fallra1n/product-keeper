@@ -8,13 +8,14 @@ import (
 
 	"github.com/fallra1n/product-service/internal/config"
 	"github.com/fallra1n/product-service/internal/domain/models"
+	"github.com/fallra1n/product-service/internal/storage"
 )
 
-type Storage struct {
+type postgres struct {
 	db *sqlx.DB
 }
 
-func New(cfg *config.Config) (*Storage, error) {
+func New(cfg *config.Config) (storage.Storage, error) {
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName)
 
@@ -27,10 +28,10 @@ func New(cfg *config.Config) (*Storage, error) {
 		return nil, err
 	}
 
-	return &Storage{db}, nil
+	return &postgres{db}, nil
 }
 
-func (s *Storage) CreateTables() error {
+func (s *postgres) CreateTables() error {
 	createUser := `
 		CREATE TABLE IF NOT EXISTS users 
 		(
@@ -47,7 +48,7 @@ func (s *Storage) CreateTables() error {
 	return nil
 }
 
-func (s *Storage) CreateUser(user models.User) error {
+func (s *postgres) CreateUser(user models.User) error {
 	query := `
 		INSERT INTO users (name, password) 
 		VALUES ($1, $2);`
@@ -57,4 +58,15 @@ func (s *Storage) CreateUser(user models.User) error {
 	}
 
 	return nil
+}
+
+func (s *postgres) GetPasswordByName(name string) (string, error) {
+	query := "SELECT password FROM users WHERE name = $1"
+
+	var user models.User
+	if err := s.db.Get(&user, query, name); err != nil {
+		return "", err
+	}
+
+	return user.Password, nil
 }
