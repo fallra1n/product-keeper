@@ -1,28 +1,53 @@
-package service
+package services
 
 import (
-	"github.com/golang-jwt/jwt/v5"
+	"crypto/sha1"
+	"fmt"
+	"log/slog"
+	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/fallra1n/product-service/internal/domain/models"
+	"github.com/fallra1n/product-service/internal/storage/postgres"
 )
 
 type Auth interface {
-	CreateUser(username, password string) (uint64, error)
-	GenerateToken(username, password string) (string, error)
+	CreateUser(user models.User) error
 }
 
 type authService struct {
+	storage *postgres.Storage
+	logger  *slog.Logger
 }
 
-func NewAuthService() Auth {
-	return &authService{}
+func NewAuthService(storage *postgres.Storage, logger *slog.Logger) Auth {
+	return &authService{storage, logger}
 }
 
-func (s *authService) CreateUser(username, password string) (uint64, error) {
-	// TODO add user to db
-	return 0, nil
+func (as *authService) CreateUser(user models.User) error {
+	return as.storage.CreateUser(models.User{
+		Name:     user.Name,
+		Password: as.hashPassword(user.Password),
+	})
 }
 
-func (s *authService) GenerateToken(username, password string) (string, error) {
+func (as *authService) hashPassword(password string) string {
+	hash := sha1.New()
+	hash.Write([]byte(password))
+
+	salt := as.fetchSalt()
+	as.logger.Warn("salt is empty")
+
+	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+}
+
+func (as *authService) fetchSalt() string {
+	return os.Getenv("PASSWORD_SALT")
+}
+
+func (as *authService) generateToken(username, password string) (string, error) {
 	// TODO verify that the user exists in db
 
 	token := jwt.New(jwt.SigningMethodHS256)
