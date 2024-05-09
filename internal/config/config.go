@@ -12,9 +12,18 @@ type HTTPServer struct {
 	Timeout time.Duration `yaml:"timeout"`
 }
 
+type Postgres struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DBName   string `yaml:"dbname"`
+}
+
 type Config struct {
 	Env        string `yaml:"env"`
 	HTTPServer `yaml:"http_server"`
+	Postgres   `yaml:"postgres"`
 }
 
 func MustLoad() *Config {
