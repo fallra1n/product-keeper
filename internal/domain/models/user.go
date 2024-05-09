@@ -1,7 +1,6 @@
 package models
 
 type User struct {
-	ID       uint64
-	Name     string
-	Password string
+	Name     string `json:"username" db:"name" binding:"required"`
+	Password string `json:"password" db:"password" binding:"required"`
 }

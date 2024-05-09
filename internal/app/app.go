@@ -13,6 +13,7 @@ import (
 	httpServer "github.com/fallra1n/product-service/internal/http-server"
 	"github.com/fallra1n/product-service/internal/http-server/handlers"
 	"github.com/fallra1n/product-service/internal/services"
+	"github.com/fallra1n/product-service/internal/storage/postgres"
 )
 
 type App interface {
@@ -34,12 +35,19 @@ func NewApp(cfg *config.Config, logger *slog.Logger) App {
 }
 
 func (a *app) Run() {
-	// TODO repo layer
+	s, err := postgres.New(a.cfg)
+	if err != nil {
+		a.logger.Error("failed to connecting to the database: " + err.Error())
+		os.Exit(1)
+	}
 
-	// TODO services layer
-	as := service.NewAuthService()
+	if err := s.CreateTables(); err != nil {
+		a.logger.Error("failed to create tables: %s", err.Error())
+		os.Exit(1)
+	}
 
-	ah := handlers.NewAuthHandler(as)
+	as := services.NewAuthService(s, a.logger)
+	ah := handlers.NewAuthHandler(as, a.logger)
 	prh := handlers.NewProductHandler()
 
 	router := httpServer.SetupRouter(ah, prh, a.logger)
