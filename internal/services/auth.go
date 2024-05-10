@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,17 +12,34 @@ import (
 	"github.com/fallra1n/product-service/internal/storage"
 )
 
-var (
-	ErrFailedHashingPassword = errors.New("failed to hash password")
-	ErrFailedGenerateToken   = errors.New("failed to generate token")
-	ErrIncorrectPassword     = errors.New("incorrect password")
-	ErrUserNotFound          = errors.New("url not found")
-	ErrUserAlreadyExist      = errors.New("url exists")
+const (
+	TokenTTL = 5 * time.Minute
 )
+
+var (
+	ErrFailedHashingPassword  = errors.New("failed to hash password")
+	ErrFailedGenerateToken    = errors.New("failed to generate token")
+	ErrIncorrectPassword      = errors.New("incorrect password")
+	ErrUserNotFound           = errors.New("url not found")
+	ErrUserAlreadyExist       = errors.New("url exists")
+	ErrInvalidTokenClaimsType = errors.New("invalid token claims type")
+	ErrFailedParseToken       = errors.New("failed to parse token")
+	ErrInvalidToken           = errors.New("invalid token")
+)
+
+var (
+	jwtSecret = os.Getenv("JWT_SECRET")
+)
+
+type tokenClaims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
 
 type Auth interface {
 	CreateUser(user models.User) error
 	LoginUser(user models.User) (string, error)
+	ParseToken(token string) (string, error)
 }
 
 type authService struct {
@@ -80,15 +98,39 @@ func (as *authService) hashPassword(password string) (string, error) {
 }
 
 func (as *authService) generateToken(username string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = username
-	claims["exp"] = time.Now().Add(time.Minute).Unix()
+	claims := &tokenClaims{
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenTTL)),
+		},
+	}
 
-	tokenString, err := token.SignedString([]byte("secret"))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		return "", ErrFailedGenerateToken
 	}
 
 	return tokenString, nil
+}
+
+func (as *authService) ParseToken(tokenString string) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+	if err != nil {
+		return "", ErrFailedParseToken
+	}
+
+	if !token.Valid {
+		return "", ErrInvalidToken
+	}
+
+	claims, ok := token.Claims.(*tokenClaims)
+	if !ok {
+		return "", ErrInvalidTokenClaimsType
+	}
+
+	return claims.Username, err
 }
