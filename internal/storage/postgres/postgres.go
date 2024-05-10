@@ -111,3 +111,15 @@ func (s *postgres) CreateProduct(product models.Product) (uint64, error) {
 
 	return id, nil
 }
+
+func (s *postgres) GetProductByID(id uint64) (models.Product, error) {
+	return models.Product{}, nil
+}
+
+func (s *postgres) UpdateProductByID(id uint64, product models.Product) (models.Product, error) {
+	return models.Product{}, nil
+}
+
+func (s *postgres) DeleteProductByID(id uint64) error {
+	return nil
+}

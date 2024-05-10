@@ -12,16 +12,19 @@ var (
 )
 
 type Users interface {
-	CreateTables() error
 	CreateUser(user models.User) error
 	GetPasswordByName(name string) (string, error)
 }
 
 type Products interface {
 	CreateProduct(product models.Product) (uint64, error)
+	GetProductByID(id uint64) (models.Product, error)
+	UpdateProductByID(id uint64, product models.Product) (models.Product, error)
+	DeleteProductByID(id uint64) error
 }
 
 type Storage interface {
+	CreateTables() error
 	Users
 	Products
 }
