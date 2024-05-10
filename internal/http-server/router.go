@@ -21,7 +21,7 @@ func SetupRouter(auth handlers.AuthHandler, productHandlers handlers.ProductHand
 	{
 		product.POST("/add", productHandlers.CreateProduct)
 		product.GET("/:id", productHandlers.GetProductByID)
-		product.PUT("/:id", productHandlers.ChangeProductByID)
+		product.PUT("/:id", productHandlers.UpdateProductByID)
 		product.DELETE("/:id", productHandlers.DeleteProductByID)
 	}
 

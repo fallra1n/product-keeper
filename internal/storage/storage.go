@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	ErrUserNotFound     = errors.New("url not found")
-	ErrUserAlreadyExist = errors.New("url exists")
+	ErrUserNotFound     = errors.New("user not found")
+	ErrUserAlreadyExist = errors.New("user exists")
+	ErrProductNotFound  = errors.New("product not found")
 )
 
 type Users interface {

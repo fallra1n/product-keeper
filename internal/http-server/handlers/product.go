@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,7 +16,7 @@ type ProductHandler interface {
 	CreateProduct(c *gin.Context)
 	GetProducts(c *gin.Context)
 	GetProductByID(c *gin.Context)
-	ChangeProductByID(c *gin.Context)
+	UpdateProductByID(c *gin.Context)
 	DeleteProductByID(c *gin.Context)
 }
 
@@ -64,7 +66,7 @@ func (p *productHandler) CreateProduct(c *gin.Context) {
 		OwnerName: userName.(string),
 	})
 	if err != nil {
-		p.logger.Error("CreateUser: " + err.Error())
+		p.logger.Error("CreateProduct: " + err.Error())
 		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
 		return
 	}
@@ -75,10 +77,49 @@ func (p *productHandler) CreateProduct(c *gin.Context) {
 	})
 }
 
-func (p *productHandler) GetProducts(c *gin.Context) {}
+func (p *productHandler) GetProductByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		p.logger.Error("GetProductByID: " + err.Error())
+		c.JSON(http.StatusBadRequest, DefaultResponse{"invalid id param"})
+		return
+	}
 
-func (p *productHandler) GetProductByID(c *gin.Context) {}
+	userName, ok := c.Get(UserContext)
+	if !ok {
+		return
+	}
 
-func (p *productHandler) ChangeProductByID(c *gin.Context) {}
+	product, err := p.services.GetProductByID(id, userName.(string))
+	if err != nil {
+		if errors.Is(err, services.ErrProductNotFound) {
+			p.logger.Error("GetProductByID: " + err.Error())
+			c.JSON(http.StatusNotFound, DefaultResponse{"product with such id does not exist"})
+			return
+		}
+
+		if errors.Is(err, services.ErrPermissionDenied) {
+			p.logger.Error("GetProductByID: " + err.Error())
+			c.JSON(http.StatusForbidden, DefaultResponse{"permission denied"})
+			return
+		}
+
+		p.logger.Error("GetProductByID: " + err.Error())
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	p.logger.Info("GetProductByID: Product data has been successfully received")
+	c.JSON(http.StatusOK, ProductResponse{
+		ID:       product.ID,
+		Name:     product.Name,
+		Price:    product.Price,
+		Quantity: product.Quantity,
+	})
+}
+
+func (p *productHandler) UpdateProductByID(c *gin.Context) {}
 
 func (p *productHandler) DeleteProductByID(c *gin.Context) {}
+
+func (p *productHandler) GetProducts(c *gin.Context) {}

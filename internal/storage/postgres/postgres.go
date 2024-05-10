@@ -113,7 +113,17 @@ func (s *postgres) CreateProduct(product models.Product) (uint64, error) {
 }
 
 func (s *postgres) GetProductByID(id uint64) (models.Product, error) {
-	return models.Product{}, nil
+	query := "SELECT * FROM products WHERE id = $1"
+
+	var product models.Product
+	if err := s.db.Get(&product, query, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Product{}, storage.ErrProductNotFound
+		}
+		return models.Product{}, err
+	}
+
+	return product, nil
 }
 
 func (s *postgres) UpdateProductByID(id uint64, product models.Product) (models.Product, error) {
