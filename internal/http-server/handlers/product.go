@@ -1,6 +1,10 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/fallra1n/product-service/internal/services"
+	"github.com/gin-gonic/gin"
+	"log/slog"
+)
 
 type ProductHandler interface {
 	CreateProduct(c *gin.Context)
@@ -10,14 +14,22 @@ type ProductHandler interface {
 	DeleteProductByID(c *gin.Context)
 }
 
-type productHandler struct{}
-
-func NewProductHandler() ProductHandler {
-	return &productHandler{}
+type productHandler struct {
+	services services.Services
+	logger   *slog.Logger
 }
 
-func (h *productHandler) CreateProduct(c *gin.Context)     {}
-func (h *productHandler) GetProducts(c *gin.Context)       {}
-func (h *productHandler) GetProductByID(c *gin.Context)    {}
-func (h *productHandler) ChangeProductByID(c *gin.Context) {}
-func (h *productHandler) DeleteProductByID(c *gin.Context) {}
+func NewProductHandler(services services.Services, logger *slog.Logger) ProductHandler {
+	return &productHandler{
+		services,
+		logger,
+	}
+}
+
+func (p *productHandler) CreateProduct(c *gin.Context) {
+
+}
+func (p *productHandler) GetProducts(c *gin.Context)       {}
+func (p *productHandler) GetProductByID(c *gin.Context)    {}
+func (p *productHandler) ChangeProductByID(c *gin.Context) {}
+func (p *productHandler) DeleteProductByID(c *gin.Context) {}

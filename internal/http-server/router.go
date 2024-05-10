@@ -15,11 +15,15 @@ func SetupRouter(auth handlers.AuthHandler, productHandlers handlers.ProductHand
 
 	router.POST("/user/register", auth.UserRegister)
 	router.POST("/user/login", auth.UserLogin)
-	router.POST("/product/add", productHandlers.CreateProduct)
 	router.GET("/products", productHandlers.GetProducts)
-	router.GET("/product/:id", productHandlers.GetProductByID)
-	router.PUT("/product/:id", productHandlers.ChangeProductByID)
-	router.DELETE("/product/:id", productHandlers.DeleteProductByID)
+
+	product := router.Group("/product", auth.UserIdentity)
+	{
+		product.POST("/add", productHandlers.CreateProduct)
+		product.GET("/:id", productHandlers.GetProductByID)
+		product.PUT("/:id", productHandlers.ChangeProductByID)
+		product.DELETE("/:id", productHandlers.DeleteProductByID)
+	}
 
 	return router
 }

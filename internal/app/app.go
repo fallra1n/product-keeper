@@ -42,13 +42,14 @@ func (a *app) Run() {
 	}
 
 	if err := s.CreateTables(); err != nil {
-		a.logger.Error("failed to create tables: %s", err.Error())
+		a.logger.Error("failed to create tables: " + err.Error())
 		os.Exit(1)
 	}
 
-	as := services.NewAuthService(s)
-	ah := handlers.NewAuthHandler(as, a.logger)
-	prh := handlers.NewProductHandler()
+	servs := services.NewServices(s)
+
+	ah := handlers.NewAuthHandler(servs, a.logger)
+	prh := handlers.NewProductHandler(servs, a.logger)
 
 	router := httpServer.SetupRouter(ah, prh, a.logger)
 

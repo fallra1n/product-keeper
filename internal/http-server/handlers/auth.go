@@ -14,6 +14,7 @@ import (
 type AuthHandler interface {
 	UserRegister(c *gin.Context)
 	UserLogin(c *gin.Context)
+	UserIdentity(c *gin.Context)
 }
 
 type Request struct {
@@ -30,12 +31,15 @@ type LoginResponse struct {
 }
 
 type authHandler struct {
-	authService services.Auth
-	logger      *slog.Logger
+	services services.Services
+	logger   *slog.Logger
 }
 
-func NewAuthHandler(authService services.Auth, logger *slog.Logger) AuthHandler {
-	return &authHandler{authService, logger}
+func NewAuthHandler(services services.Services, logger *slog.Logger) AuthHandler {
+	return &authHandler{
+		services,
+		logger,
+	}
 }
 
 func (ah *authHandler) UserRegister(c *gin.Context) {
@@ -47,7 +51,7 @@ func (ah *authHandler) UserRegister(c *gin.Context) {
 		return
 	}
 
-	err := ah.authService.CreateUser(models.User{
+	err := ah.services.CreateUser(models.User{
 		Name:     req.Name,
 		Password: req.Password,
 	})
@@ -83,7 +87,7 @@ func (ah *authHandler) UserLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := ah.authService.LoginUser(models.User{
+	token, err := ah.services.LoginUser(models.User{
 		Name:     req.Name,
 		Password: req.Password,
 	})
