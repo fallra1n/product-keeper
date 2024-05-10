@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	AuthHeader = "Authorization"
+	AuthHeader  = "Authorization"
+	UserContext = "username"
 )
 
 func (ah *authHandler) UserIdentity(c *gin.Context) {
@@ -33,5 +34,5 @@ func (ah *authHandler) UserIdentity(c *gin.Context) {
 		return
 	}
 
-	c.Set("username", username)
+	c.Set(UserContext, username)
 }

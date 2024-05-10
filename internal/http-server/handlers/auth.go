@@ -17,13 +17,9 @@ type AuthHandler interface {
 	UserIdentity(c *gin.Context)
 }
 
-type Request struct {
+type AuthRequest struct {
 	Name     string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
-}
-
-type DefaultResponse struct {
-	Message string `json:"message"`
 }
 
 type LoginResponse struct {
@@ -43,7 +39,7 @@ func NewAuthHandler(services services.Services, logger *slog.Logger) AuthHandler
 }
 
 func (ah *authHandler) UserRegister(c *gin.Context) {
-	var req Request
+	var req AuthRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		ah.logger.Error("UserRegister: " + err.Error())
@@ -74,12 +70,12 @@ func (ah *authHandler) UserRegister(c *gin.Context) {
 		return
 	}
 
-	ah.logger.Info("UserRegister: a user has been successfully registered with username: %s", req.Name)
+	ah.logger.Info("UserRegister: a user has been successfully registered")
 	c.JSON(http.StatusOK, DefaultResponse{"a user has been successfully registered"})
 }
 
 func (ah *authHandler) UserLogin(c *gin.Context) {
-	var req Request
+	var req AuthRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		ah.logger.Error("UserLogin: " + err.Error())
@@ -110,6 +106,6 @@ func (ah *authHandler) UserLogin(c *gin.Context) {
 		return
 	}
 
-	ah.logger.Info("UserLogin: a user has been successfully authorized: %s", req.Name)
+	ah.logger.Info("UserLogin: a user has been successfully authorized")
 	c.JSON(http.StatusOK, LoginResponse{token})
 }
