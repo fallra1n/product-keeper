@@ -47,7 +47,9 @@ func (s *postgres) CreateTables() error {
 		    id SERIAL PRIMARY KEY,
 		    name VARCHAR(255) NOT NULL,
 		    price INT NOT NULL,
-		    quantity INT NOT NULL
+		    quantity INT NOT NULL,
+		    owner_name VARCHAR(255) NOT NULL,
+		    FOREIGN KEY (owner_name) REFERENCES users(name)
 		);`
 
 	if _, err := s.db.Exec(createUser); err != nil {
@@ -91,4 +93,21 @@ func (s *postgres) GetPasswordByName(name string) (string, error) {
 	}
 
 	return user.Password, nil
+}
+
+func (s *postgres) CreateProduct(product models.Product) (uint64, error) {
+	query := `
+		INSERT INTO products (name, price, quantity, owner_name) 
+		VALUES ($1, $2, $3, $4)
+		RETURNING id;`
+
+	row := s.db.QueryRow(query, product.Name, product.Price, product.Quantity, product.OwnerName)
+
+	var id uint64
+	err := row.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

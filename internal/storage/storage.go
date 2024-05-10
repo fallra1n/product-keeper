@@ -17,7 +17,9 @@ type Users interface {
 	GetPasswordByName(name string) (string, error)
 }
 
-type Products interface{}
+type Products interface {
+	CreateProduct(product models.Product) (uint64, error)
+}
 
 type Storage interface {
 	Users
