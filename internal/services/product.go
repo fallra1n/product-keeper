@@ -58,6 +58,19 @@ func (s *productService) UpdateProductByID(newProduct models.Product) (models.Pr
 	return s.storage.UpdateProductByID(newProduct)
 }
 
-func (s *productService) DeleteProductByID(id uint64) error {
-	return nil
+func (s *productService) DeleteProductByID(id uint64, username string) error {
+	product, err := s.storage.GetProductByID(id)
+	if err != nil {
+		if errors.Is(err, storage.ErrProductNotFound) {
+			return ErrProductNotFound
+		}
+
+		return err
+	}
+
+	if product.OwnerName != username {
+		return ErrPermissionDenied
+	}
+
+	return s.storage.DeleteProductByID(id)
 }

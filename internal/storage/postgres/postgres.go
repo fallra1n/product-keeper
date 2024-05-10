@@ -82,7 +82,7 @@ func (s *postgres) CreateUser(user models.User) error {
 }
 
 func (s *postgres) GetPasswordByName(name string) (string, error) {
-	query := "SELECT password FROM users WHERE name = $1"
+	query := "SELECT password FROM users WHERE name = $1;"
 
 	var user models.User
 	if err := s.db.Get(&user, query, name); err != nil {
@@ -113,7 +113,7 @@ func (s *postgres) CreateProduct(product models.Product) (uint64, error) {
 }
 
 func (s *postgres) GetProductByID(id uint64) (models.Product, error) {
-	query := "SELECT * FROM products WHERE id = $1"
+	query := "SELECT * FROM products WHERE id = $1;"
 
 	var product models.Product
 	if err := s.db.Get(&product, query, id); err != nil {
@@ -142,5 +142,10 @@ func (s *postgres) UpdateProductByID(newProduct models.Product) (models.Product,
 }
 
 func (s *postgres) DeleteProductByID(id uint64) error {
+	query := "DELETE FROM products WHERE id = $1;"
+	if _, err := s.db.Exec(query, id); err != nil {
+		return err
+	}
+
 	return nil
 }

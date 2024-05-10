@@ -46,16 +46,15 @@ func NewProductHandler(services services.Services, logger *slog.Logger) ProductH
 }
 
 func (p *productHandler) CreateProduct(c *gin.Context) {
-	var req ProductRequest
-
-	if err := c.BindJSON(&req); err != nil {
-		p.logger.Error("CreateProduct: " + err.Error())
-		c.JSON(http.StatusBadRequest, DefaultResponse{"failed to decode request"})
+	userName, ok := c.Get(UserContext)
+	if !ok {
 		return
 	}
 
-	userName, ok := c.Get(UserContext)
-	if !ok {
+	var req ProductRequest
+	if err := c.BindJSON(&req); err != nil {
+		p.logger.Error("CreateProduct: " + err.Error())
+		c.JSON(http.StatusBadRequest, DefaultResponse{"failed to decode request"})
 		return
 	}
 
@@ -78,15 +77,15 @@ func (p *productHandler) CreateProduct(c *gin.Context) {
 }
 
 func (p *productHandler) GetProductByID(c *gin.Context) {
+	userName, ok := c.Get(UserContext)
+	if !ok {
+		return
+	}
+
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		p.logger.Error("GetProductByID: " + err.Error())
 		c.JSON(http.StatusBadRequest, DefaultResponse{"invalid id param"})
-		return
-	}
-
-	userName, ok := c.Get(UserContext)
-	if !ok {
 		return
 	}
 
@@ -119,6 +118,11 @@ func (p *productHandler) GetProductByID(c *gin.Context) {
 }
 
 func (p *productHandler) UpdateProductByID(c *gin.Context) {
+	userName, ok := c.Get(UserContext)
+	if !ok {
+		return
+	}
+
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		p.logger.Error("UpdateProductByID: " + err.Error())
@@ -130,11 +134,6 @@ func (p *productHandler) UpdateProductByID(c *gin.Context) {
 	if err := c.BindJSON(&req); err != nil {
 		p.logger.Error("UpdateProductByID: " + err.Error())
 		c.JSON(http.StatusBadRequest, DefaultResponse{"failed to decode request"})
-		return
-	}
-
-	userName, ok := c.Get(UserContext)
-	if !ok {
 		return
 	}
 
@@ -172,6 +171,39 @@ func (p *productHandler) UpdateProductByID(c *gin.Context) {
 	})
 }
 
-func (p *productHandler) DeleteProductByID(c *gin.Context) {}
+func (p *productHandler) DeleteProductByID(c *gin.Context) {
+	userName, ok := c.Get(UserContext)
+	if !ok {
+		return
+	}
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		p.logger.Error("DeleteProductByID: " + err.Error())
+		c.JSON(http.StatusBadRequest, DefaultResponse{"invalid id param"})
+		return
+	}
+
+	if err := p.services.DeleteProductByID(id, userName.(string)); err != nil {
+		if errors.Is(err, services.ErrProductNotFound) {
+			p.logger.Error("DeleteProductByID: " + err.Error())
+			c.JSON(http.StatusNotFound, DefaultResponse{"product with such id does not exist"})
+			return
+		}
+
+		if errors.Is(err, services.ErrPermissionDenied) {
+			p.logger.Error("DeleteProductByID: " + err.Error())
+			c.JSON(http.StatusForbidden, DefaultResponse{"permission denied"})
+			return
+		}
+
+		p.logger.Error("DeleteProductByID: " + err.Error())
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	p.logger.Info("DeleteProductByID: product has been successfully deleted")
+	c.JSON(http.StatusOK, DefaultResponse{"product has been successfully deleted"})
+}
 
 func (p *productHandler) GetProducts(c *gin.Context) {}
