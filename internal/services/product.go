@@ -12,13 +12,6 @@ var (
 	ErrPermissionDenied = errors.New("user does not have access to this product")
 )
 
-type Product interface {
-	CreateProduct(product models.Product) (uint64, error)
-	GetProductByID(id uint64, username string) (models.Product, error)
-	UpdateProductByID(newProduct models.Product) (models.Product, error)
-	DeleteProductByID(id uint64) error
-}
-
 type productService struct {
 	storage storage.Storage
 }
@@ -49,7 +42,20 @@ func (s *productService) GetProductByID(id uint64, username string) (models.Prod
 }
 
 func (s *productService) UpdateProductByID(newProduct models.Product) (models.Product, error) {
-	return models.Product{}, nil
+	product, err := s.storage.GetProductByID(newProduct.ID)
+	if err != nil {
+		if errors.Is(err, storage.ErrProductNotFound) {
+			return models.Product{}, ErrProductNotFound
+		}
+
+		return models.Product{}, err
+	}
+
+	if product.OwnerName != newProduct.OwnerName {
+		return models.Product{}, ErrPermissionDenied
+	}
+
+	return s.storage.UpdateProductByID(newProduct)
 }
 
 func (s *productService) DeleteProductByID(id uint64) error {

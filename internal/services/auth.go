@@ -36,12 +36,6 @@ type tokenClaims struct {
 	jwt.RegisteredClaims
 }
 
-type Auth interface {
-	CreateUser(user models.User) error
-	LoginUser(user models.User) (string, error)
-	ParseToken(token string) (string, error)
-}
-
 type authService struct {
 	storage storage.Storage
 }

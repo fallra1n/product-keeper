@@ -1,6 +1,22 @@
 package services
 
-import "github.com/fallra1n/product-service/internal/storage"
+import (
+	"github.com/fallra1n/product-service/internal/domain/models"
+	"github.com/fallra1n/product-service/internal/storage"
+)
+
+type Auth interface {
+	CreateUser(user models.User) error
+	LoginUser(user models.User) (string, error)
+	ParseToken(token string) (string, error)
+}
+
+type Product interface {
+	CreateProduct(product models.Product) (uint64, error)
+	GetProductByID(id uint64, username string) (models.Product, error)
+	UpdateProductByID(newProduct models.Product) (models.Product, error)
+	DeleteProductByID(id uint64) error
+}
 
 type Services interface {
 	Auth

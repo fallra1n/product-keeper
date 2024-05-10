@@ -109,7 +109,7 @@ func (p *productHandler) GetProductByID(c *gin.Context) {
 		return
 	}
 
-	p.logger.Info("GetProductByID: Product data has been successfully received")
+	p.logger.Info("GetProductByID: product data has been successfully received")
 	c.JSON(http.StatusOK, ProductResponse{
 		ID:       product.ID,
 		Name:     product.Name,
@@ -118,7 +118,59 @@ func (p *productHandler) GetProductByID(c *gin.Context) {
 	})
 }
 
-func (p *productHandler) UpdateProductByID(c *gin.Context) {}
+func (p *productHandler) UpdateProductByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		p.logger.Error("UpdateProductByID: " + err.Error())
+		c.JSON(http.StatusBadRequest, DefaultResponse{"invalid id param"})
+		return
+	}
+
+	var req ProductRequest
+	if err := c.BindJSON(&req); err != nil {
+		p.logger.Error("UpdateProductByID: " + err.Error())
+		c.JSON(http.StatusBadRequest, DefaultResponse{"failed to decode request"})
+		return
+	}
+
+	userName, ok := c.Get(UserContext)
+	if !ok {
+		return
+	}
+
+	updated, err := p.services.UpdateProductByID(models.Product{
+		ID:        id,
+		Name:      req.Name,
+		Price:     req.Price,
+		Quantity:  req.Quantity,
+		OwnerName: userName.(string),
+	})
+	if err != nil {
+		if errors.Is(err, services.ErrProductNotFound) {
+			p.logger.Error("UpdateProductByID: " + err.Error())
+			c.JSON(http.StatusNotFound, DefaultResponse{"product with such id does not exist"})
+			return
+		}
+
+		if errors.Is(err, services.ErrPermissionDenied) {
+			p.logger.Error("UpdateProductByID: " + err.Error())
+			c.JSON(http.StatusForbidden, DefaultResponse{"permission denied"})
+			return
+		}
+
+		p.logger.Error("UpdateProductByID: " + err.Error())
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	p.logger.Info("UpdateProductByID: product data has been successfully updated")
+	c.JSON(http.StatusOK, ProductResponse{
+		ID:       updated.ID,
+		Name:     updated.Name,
+		Price:    updated.Price,
+		Quantity: updated.Quantity,
+	})
+}
 
 func (p *productHandler) DeleteProductByID(c *gin.Context) {}
 

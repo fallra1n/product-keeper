@@ -126,8 +126,19 @@ func (s *postgres) GetProductByID(id uint64) (models.Product, error) {
 	return product, nil
 }
 
-func (s *postgres) UpdateProductByID(id uint64, product models.Product) (models.Product, error) {
-	return models.Product{}, nil
+func (s *postgres) UpdateProductByID(newProduct models.Product) (models.Product, error) {
+	query := `
+        UPDATE products
+        SET name = $1, price = $2, quantity = $3
+        WHERE id = $4
+        RETURNING *;`
+
+	var updated models.Product
+	if err := s.db.Get(&updated, query, newProduct.Name, newProduct.Price, newProduct.Quantity, newProduct.ID); err != nil {
+		return models.Product{}, err
+	}
+
+	return updated, nil
 }
 
 func (s *postgres) DeleteProductByID(id uint64) error {
