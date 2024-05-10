@@ -37,13 +37,24 @@ func (s *postgres) CreateTables() error {
 	createUser := `
 		CREATE TABLE IF NOT EXISTS users 
 		(
-			name Varchar(255) NOT NULL UNIQUE,
-		    password varchar(255) NOT NULL
+			name VARCHAR(255) NOT NULL UNIQUE,
+		    password VARCHAR(255) NOT NULL
 		);`
 
-	// TODO create products table
+	createProduct := `
+		CREATE TABLE IF NOT EXISTS products
+		(
+		    id SERIAL PRIMARY KEY,
+		    name VARCHAR(255) NOT NULL,
+		    price INT NOT NULL,
+		    quantity INT NOT NULL
+		);`
 
 	if _, err := s.db.Exec(createUser); err != nil {
+		return err
+	}
+
+	if _, err := s.db.Exec(createProduct); err != nil {
 		return err
 	}
 
