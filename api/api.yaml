@@ -309,7 +309,7 @@ paths:
 components:
   securitySchemes:
     bearerAuth:
-      type: http-server
+      type: http
       scheme: bearer
       bearerFormat: JWT
   schemas:

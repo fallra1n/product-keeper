@@ -1,9 +1,11 @@
 package handlers
 
 import (
-	"github.com/fallra1n/product-service/internal/services"
-	"github.com/gin-gonic/gin"
 	"log/slog"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/fallra1n/product-service/internal/services"
 )
 
 type ProductHandler interface {
