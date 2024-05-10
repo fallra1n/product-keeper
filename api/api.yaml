@@ -94,7 +94,7 @@ paths:
                 type: object
                 properties:
                   product_id:
-                    type: string
+                    type: integer
                     description: ID of the created product
         '400':
           description: Incorrect data
