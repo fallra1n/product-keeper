@@ -49,6 +49,7 @@ func (s *postgres) CreateTables() error {
 		    price INT NOT NULL,
 		    quantity INT NOT NULL,
 		    owner_name VARCHAR(255) NOT NULL,
+		    created_at TIMESTAMP NOT NULL,
 		    FOREIGN KEY (owner_name) REFERENCES users(name)
 		);`
 
@@ -97,11 +98,11 @@ func (s *postgres) GetPasswordByName(name string) (string, error) {
 
 func (s *postgres) CreateProduct(product models.Product) (uint64, error) {
 	query := `
-		INSERT INTO products (name, price, quantity, owner_name) 
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO products (name, price, quantity, owner_name, created_at) 
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id;`
 
-	row := s.db.QueryRow(query, product.Name, product.Price, product.Quantity, product.OwnerName)
+	row := s.db.QueryRow(query, product.Name, product.Price, product.Quantity, product.OwnerName, product.CreatedAt)
 
 	var id uint64
 	err := row.Scan(&id)
@@ -148,4 +149,31 @@ func (s *postgres) DeleteProductByID(id uint64) error {
 	}
 
 	return nil
+}
+
+func (s *postgres) GetProducts(username string, productName string, sortBy models.SortType) ([]models.Product, error) {
+	query := "SELECT * FROM products WHERE owner_name = $1"
+
+	if productName != "" {
+		query += fmt.Sprintf(" AND name = %s", productName)
+	}
+
+	switch sortBy {
+	case models.Name:
+		query += " ORDER BY name"
+	case models.LastCreate:
+		query += " ORDER BY last_create DESC"
+	}
+
+	query += ";"
+
+	var products []models.Product
+	if err := s.db.Select(&products, query, username); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, storage.ErrProductNotFound
+		}
+		return nil, err
+	}
+
+	return products, nil
 }

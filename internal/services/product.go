@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"time"
 
 	"github.com/fallra1n/product-service/internal/domain/models"
 	"github.com/fallra1n/product-service/internal/storage"
@@ -21,6 +22,7 @@ func NewProductService(storage storage.Storage) Product {
 }
 
 func (s *productService) CreateProduct(product models.Product) (uint64, error) {
+	product.CreatedAt = time.Now()
 	return s.storage.CreateProduct(product)
 }
 
