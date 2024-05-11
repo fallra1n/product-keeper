@@ -7,10 +7,10 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/fallra1n/product-service/internal/app"
-	"github.com/fallra1n/product-service/internal/config"
-	"github.com/fallra1n/product-service/pkg/logging"
-	"github.com/fallra1n/product-service/pkg/shutdown"
+	"github.com/fallra1n/product-keeper/internal/app"
+	"github.com/fallra1n/product-keeper/internal/config"
+	"github.com/fallra1n/product-keeper/pkg/logging"
+	"github.com/fallra1n/product-keeper/pkg/shutdown"
 )
 
 func main() {

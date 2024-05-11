@@ -1,4 +1,4 @@
-module github.com/fallra1n/product-service
+module github.com/fallra1n/product-keeper
 
 go 1.22.0
 

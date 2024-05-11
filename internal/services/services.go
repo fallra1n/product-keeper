@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/fallra1n/product-service/internal/domain/models"
-	"github.com/fallra1n/product-service/internal/storage"
+	"github.com/fallra1n/product-keeper/internal/domain/models"
+	"github.com/fallra1n/product-keeper/internal/storage"
 )
 
 type Auth interface {

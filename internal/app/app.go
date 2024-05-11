@@ -9,11 +9,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/fallra1n/product-service/internal/config"
-	httpServer "github.com/fallra1n/product-service/internal/http-server"
-	"github.com/fallra1n/product-service/internal/http-server/handlers"
-	"github.com/fallra1n/product-service/internal/services"
-	"github.com/fallra1n/product-service/internal/storage/postgres"
+	"github.com/fallra1n/product-keeper/internal/config"
+	httpServer "github.com/fallra1n/product-keeper/internal/http-server"
+	"github.com/fallra1n/product-keeper/internal/http-server/handlers"
+	"github.com/fallra1n/product-keeper/internal/services"
+	"github.com/fallra1n/product-keeper/internal/storage/postgres"
 )
 
 type App interface {

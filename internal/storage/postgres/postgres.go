@@ -8,9 +8,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 
-	"github.com/fallra1n/product-service/internal/config"
-	"github.com/fallra1n/product-service/internal/domain/models"
-	"github.com/fallra1n/product-service/internal/storage"
+	"github.com/fallra1n/product-keeper/internal/config"
+	"github.com/fallra1n/product-keeper/internal/domain/models"
+	"github.com/fallra1n/product-keeper/internal/storage"
 )
 
 type postgres struct {

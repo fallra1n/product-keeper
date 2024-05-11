@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/fallra1n/product-service/internal/http-server/handlers"
+	"github.com/fallra1n/product-keeper/internal/http-server/handlers"
 )
 
 func SetupRouter(auth handlers.AuthHandler, productHandlers handlers.ProductHandler, logger *slog.Logger) *gin.Engine {

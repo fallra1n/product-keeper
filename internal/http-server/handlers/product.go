@@ -8,8 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/fallra1n/product-service/internal/domain/models"
-	"github.com/fallra1n/product-service/internal/services"
+	"github.com/fallra1n/product-keeper/internal/domain/models"
+	"github.com/fallra1n/product-keeper/internal/services"
 )
 
 type ProductHandler interface {

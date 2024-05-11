@@ -8,8 +8,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/fallra1n/product-service/internal/domain/models"
-	"github.com/fallra1n/product-service/internal/storage"
+	"github.com/fallra1n/product-keeper/internal/domain/models"
+	"github.com/fallra1n/product-keeper/internal/storage"
 )
 
 const (

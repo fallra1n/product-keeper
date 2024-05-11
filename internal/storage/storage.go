@@ -3,7 +3,7 @@ package storage
 import (
 	"errors"
 
-	"github.com/fallra1n/product-service/internal/domain/models"
+	"github.com/fallra1n/product-keeper/internal/domain/models"
 )
 
 var (
