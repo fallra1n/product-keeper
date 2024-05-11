@@ -54,8 +54,10 @@ func (a *app) Run() {
 	router := httpServer.SetupRouter(ah, prh, a.logger)
 
 	a.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(a.cfg.HTTPServer.Address),
-		Handler: router,
+		Addr:         fmt.Sprintf(":%s", a.cfg.HTTPServer.Port),
+		Handler:      router,
+		ReadTimeout:  a.cfg.HTTPServer.Timeout,
+		WriteTimeout: a.cfg.HTTPServer.Timeout,
 	}
 
 	go func() {

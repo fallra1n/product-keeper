@@ -8,7 +8,7 @@ import (
 )
 
 type HTTPServer struct {
-	Address string        `yaml:"address"`
+	Port    string        `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
 }
 

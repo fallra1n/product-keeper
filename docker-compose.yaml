@@ -1,6 +1,14 @@
 version: latest
 
 services:
+  app:
+    container_name: product-keeper
+    build: ./
+    command: ./wait-for-postgres.sh ./product-keeper
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
   db:
     container_name: postgres
     image: postgres:latest

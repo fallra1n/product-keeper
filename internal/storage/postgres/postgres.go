@@ -18,8 +18,8 @@ type postgres struct {
 }
 
 func New(cfg *config.Config) (storage.Storage, error) {
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-		cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName)
+	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
+		cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName)
 
 	db, err := sqlx.Open("postgres", connStr)
 	if err != nil {
