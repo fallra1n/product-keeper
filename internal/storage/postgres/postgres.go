@@ -155,23 +155,20 @@ func (s *postgres) GetProducts(username string, productName string, sortBy model
 	query := "SELECT * FROM products WHERE owner_name = $1"
 
 	if productName != "" {
-		query += fmt.Sprintf(" AND name = %s", productName)
+		query += fmt.Sprintf(" AND name = '%s'", productName)
 	}
 
 	switch sortBy {
 	case models.Name:
 		query += " ORDER BY name"
 	case models.LastCreate:
-		query += " ORDER BY last_create DESC"
+		query += " ORDER BY created_at DESC"
 	}
 
 	query += ";"
 
 	var products []models.Product
 	if err := s.db.Select(&products, query, username); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, storage.ErrProductNotFound
-		}
 		return nil, err
 	}
 

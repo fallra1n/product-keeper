@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,10 +15,10 @@ import (
 
 type ProductHandler interface {
 	CreateProduct(c *gin.Context)
-	GetProducts(c *gin.Context)
 	GetProductByID(c *gin.Context)
 	UpdateProductByID(c *gin.Context)
 	DeleteProductByID(c *gin.Context)
+	GetProducts(c *gin.Context)
 }
 
 type ProductRequest struct {
@@ -27,10 +28,11 @@ type ProductRequest struct {
 }
 
 type ProductResponse struct {
-	ID       uint64 `json:"id" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	Price    uint64 `json:"price" binding:"required"`
-	Quantity uint64 `json:"quantity" binding:"required"`
+	ID        uint64    `json:"id" binding:"required"`
+	Name      string    `json:"name" binding:"required"`
+	Price     uint64    `json:"price" binding:"required"`
+	Quantity  uint64    `json:"quantity" binding:"required"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 type productHandler struct {
@@ -206,4 +208,48 @@ func (p *productHandler) DeleteProductByID(c *gin.Context) {
 	c.JSON(http.StatusOK, DefaultResponse{"product has been successfully deleted"})
 }
 
-func (p *productHandler) GetProducts(c *gin.Context) {}
+func (p *productHandler) GetProducts(c *gin.Context) {
+	userName, ok := c.Get(UserContext)
+	if !ok {
+		return
+	}
+
+	productName := c.Query("name")
+	sortByString := c.Query("sort_by")
+
+	var sortBy models.SortType
+	switch sortByString {
+	case "last_create":
+		sortBy = models.LastCreate
+	case "name":
+		sortBy = models.Name
+	case "":
+		sortBy = models.Empty
+	default:
+		p.logger.Error("GetProducts: bad sort_by param")
+		c.JSON(http.StatusBadRequest, DefaultResponse{"invalid sort_by param"})
+		return
+	}
+
+	products, err := p.services.GetProducts(userName.(string), productName, sortBy)
+	if err != nil {
+		p.logger.Error("GetProducts: " + err.Error())
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	var productsResponse []ProductResponse
+	for _, product := range products {
+		productResponse := ProductResponse{
+			ID:        product.ID,
+			Name:      product.Name,
+			Price:     product.Price,
+			Quantity:  product.Quantity,
+			CreatedAt: product.CreatedAt,
+		}
+		productsResponse = append(productsResponse, productResponse)
+	}
+
+	p.logger.Info("GetProducts: products has been successfully received")
+	c.JSON(http.StatusOK, productsResponse)
+}

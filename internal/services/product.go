@@ -76,3 +76,7 @@ func (s *productService) DeleteProductByID(id uint64, username string) error {
 
 	return s.storage.DeleteProductByID(id)
 }
+
+func (s *productService) GetProducts(username string, productName string, sortBy models.SortType) ([]models.Product, error) {
+	return s.storage.GetProducts(username, productName, sortBy)
+}

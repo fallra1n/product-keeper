@@ -16,6 +16,7 @@ type Product interface {
 	GetProductByID(id uint64, username string) (models.Product, error)
 	UpdateProductByID(newProduct models.Product) (models.Product, error)
 	DeleteProductByID(id uint64, username string) error
+	GetProducts(username string, productName string, sortBy models.SortType) ([]models.Product, error)
 }
 
 type Services interface {

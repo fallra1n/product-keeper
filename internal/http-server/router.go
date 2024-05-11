@@ -15,7 +15,11 @@ func SetupRouter(auth handlers.AuthHandler, productHandlers handlers.ProductHand
 
 	router.POST("/user/register", auth.UserRegister)
 	router.POST("/user/login", auth.UserLogin)
-	router.GET("/products", productHandlers.GetProducts)
+
+	products := router.Group("/products", auth.UserIdentity)
+	{
+		products.GET("", productHandlers.GetProducts)
+	}
 
 	product := router.Group("/product", auth.UserIdentity)
 	{

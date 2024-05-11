@@ -7,6 +7,7 @@ type SortType string
 const (
 	LastCreate SortType = "last_create"
 	Name       SortType = "name"
+	Empty      SortType = ""
 )
 
 type Product struct {
