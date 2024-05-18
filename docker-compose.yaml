@@ -1,0 +1,21 @@
+version: latest
+
+services:
+  app:
+    container_name: product-keeper
+    build: ./
+    command: ./wait-for-postgres.sh ./product-keeper
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+  db:
+    container_name: postgres
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "pass"
+    ports:
+      - "5432:5432"

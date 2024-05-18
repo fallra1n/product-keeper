@@ -1,0 +1,12 @@
+env: "local"
+
+http_server:
+  port: "8080"
+  timeout: 5s
+
+postgres:
+  host: "db"
+  port: "5432"
+  user: "postgres"
+  dbname: "postgres"
+  password: "pass"
