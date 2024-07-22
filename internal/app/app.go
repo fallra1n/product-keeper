@@ -10,8 +10,7 @@ import (
 	"time"
 
 	"github.com/fallra1n/product-keeper/internal/config"
-	httpServer "github.com/fallra1n/product-keeper/internal/http-server"
-	"github.com/fallra1n/product-keeper/internal/http-server/handlers"
+	httphandler "github.com/fallra1n/product-keeper/internal/http-handler"
 	"github.com/fallra1n/product-keeper/internal/services"
 	"github.com/fallra1n/product-keeper/internal/storage/postgres"
 )
@@ -48,10 +47,10 @@ func (a *app) Run() {
 
 	servs := services.NewServices(s)
 
-	ah := handlers.NewAuthHandler(servs, a.logger)
-	prh := handlers.NewProductHandler(servs, a.logger)
+	ah := httphandler.NewAuthHandler(servs, a.logger)
+	prh := httphandler.NewProductHandler(servs, a.logger)
 
-	router := httpServer.SetupRouter(ah, prh, a.logger)
+	router := httphandler.SetupRouter(ah, prh, a.logger)
 
 	a.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%s", a.cfg.HTTPServer.Port),

@@ -1,14 +1,13 @@
-package handlers
+package httphandler
 
 import (
 	"errors"
 	"log/slog"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/fallra1n/product-keeper/internal/domain/models"
 	"github.com/fallra1n/product-keeper/internal/services"
+	"github.com/gin-gonic/gin"
 )
 
 type AuthHandler interface {

@@ -1,14 +1,12 @@
-package http
+package httphandler
 
 import (
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/fallra1n/product-keeper/internal/http-server/handlers"
 )
 
-func SetupRouter(auth handlers.AuthHandler, productHandlers handlers.ProductHandler, logger *slog.Logger) *gin.Engine {
+func SetupRouter(auth AuthHandler, productHandlers ProductHandler, logger *slog.Logger) *gin.Engine {
 	router := gin.Default()
 
 	// TODO using custom logger

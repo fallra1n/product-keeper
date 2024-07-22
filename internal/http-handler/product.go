@@ -1,4 +1,4 @@
-package handlers
+package httphandler
 
 import (
 	"errors"
@@ -7,10 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/fallra1n/product-keeper/internal/domain/models"
 	"github.com/fallra1n/product-keeper/internal/services"
+	"github.com/gin-gonic/gin"
 )
 
 type ProductHandler interface {
