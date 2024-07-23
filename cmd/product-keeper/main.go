@@ -7,8 +7,8 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"github.com/fallra1n/product-keeper/config"
 	"github.com/fallra1n/product-keeper/internal/app"
-	"github.com/fallra1n/product-keeper/internal/config"
 	"github.com/fallra1n/product-keeper/pkg/logging"
 	"github.com/fallra1n/product-keeper/pkg/shutdown"
 )
