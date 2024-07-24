@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/fallra1n/product-keeper/internal/domain/models"
-	"github.com/fallra1n/product-keeper/internal/adapters/repository"
+	"golang.org/x/mod/sumdb/storage"
 )
 
 type Auth interface {

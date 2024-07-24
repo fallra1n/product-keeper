@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	services "github.com/fallra1n/product-keeper/internal/core"
 	"github.com/fallra1n/product-keeper/internal/domain/models"
-	"github.com/fallra1n/product-keeper/internal/services"
 	"github.com/gin-gonic/gin"
 )
 

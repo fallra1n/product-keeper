@@ -13,17 +13,6 @@ JWT_SECRET=qwerty
 docker-compose up --build 
 ```
 
-## Описание
-* API сервиса полностью описан в файле [api.yaml](api/api.yaml) с помощью [OpenAPI](https://www.openapis.org/). 
-* БД: в качесве базы данных используется postgres, для работы с бд используется популярный фреймворк [sqlx](https://github.com/jmoiron/sqlx).
-* HTTP: для реализации http сервера используется фреймворк [gin](https://github.com/gin-gonic/gin).
-* Для авторизации используются JWT токены и библиотека [jwt](https://github.com/golang-jwt/jwt).
-* БД и сам сервис запускаются в докер контейнере(скрипт [wait-for-postgres.sh](wait-for-postgres.sh) нужен для того, чтобы дождатся запуска бд перед стартом приложения).
-* Используется стандартная структура проекта(cmd, internal, pkg, ...)
-* Код разбит на слои: сервисный слой, слой для работы с бд, http handler'ы - папка internal.
-* В папке pkg переиспользуемый код(logging, gracefull shutdown).
-
-
 ## Примеры взаимодействия с API
 
 * Регистрация пользователя:

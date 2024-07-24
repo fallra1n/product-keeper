@@ -6,15 +6,21 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
+	"golang.org/x/mod/sumdb/storage"
 
 	"github.com/fallra1n/product-keeper/config"
-	storage "github.com/fallra1n/product-keeper/internal/adapters/repository"
+	"github.com/fallra1n/product-keeper/internal/core/shared"
 	"github.com/fallra1n/product-keeper/internal/domain/models"
 )
 
 type postgres struct {
 	db *sqlx.DB
+}
+
+type ProductsRepository struct{}
+
+func NewProducts() *ProductsRepository {
+	return &ProductsRepository{}
 }
 
 func New(cfg *config.Config) (storage.Storage, error) {
@@ -33,7 +39,7 @@ func New(cfg *config.Config) (storage.Storage, error) {
 	return &postgres{db}, nil
 }
 
-func (s *postgres) CreateTables() error {
+func (r *ProductsRepository) CreateTables() error {
 	createUser := `
 		CREATE TABLE IF NOT EXISTS users 
 		(
@@ -64,39 +70,7 @@ func (s *postgres) CreateTables() error {
 	return nil
 }
 
-func (s *postgres) CreateUser(user models.User) error {
-	query := `
-		INSERT INTO users (name, password) 
-		VALUES ($1, $2);`
-
-	if _, err := s.db.Exec(query, user.Name, user.Password); err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			if pqErr.Code == "23505" {
-				return storage.ErrUserAlreadyExist
-			}
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-func (s *postgres) GetPasswordByName(name string) (string, error) {
-	query := "SELECT password FROM users WHERE name = $1;"
-
-	var user models.User
-	if err := s.db.Get(&user, query, name); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return "", storage.ErrUserNotFound
-		}
-		return "", err
-	}
-
-	return user.Password, nil
-}
-
-func (s *postgres) CreateProduct(product models.Product) (uint64, error) {
+func (r *ProductsRepository) CreateProduct(product models.Product) (uint64, error) {
 	query := `
 		INSERT INTO products (name, price, quantity, owner_name, created_at) 
 		VALUES ($1, $2, $3, $4, $5)
@@ -113,13 +87,13 @@ func (s *postgres) CreateProduct(product models.Product) (uint64, error) {
 	return id, nil
 }
 
-func (s *postgres) GetProductByID(id uint64) (models.Product, error) {
+func (r *ProductsRepository) GetProductByID(id uint64) (models.Product, error) {
 	query := "SELECT * FROM products WHERE id = $1;"
 
 	var product models.Product
 	if err := s.db.Get(&product, query, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.Product{}, storage.ErrProductNotFound
+			return models.Product{}, shared.ErrNoData
 		}
 		return models.Product{}, err
 	}
@@ -127,7 +101,7 @@ func (s *postgres) GetProductByID(id uint64) (models.Product, error) {
 	return product, nil
 }
 
-func (s *postgres) UpdateProductByID(newProduct models.Product) (models.Product, error) {
+func (r *ProductsRepository) UpdateProductByID(newProduct models.Product) (models.Product, error) {
 	query := `
         UPDATE products
         SET name = $1, price = $2, quantity = $3
@@ -142,7 +116,7 @@ func (s *postgres) UpdateProductByID(newProduct models.Product) (models.Product,
 	return updated, nil
 }
 
-func (s *postgres) DeleteProductByID(id uint64) error {
+func (r *ProductsRepository) DeleteProductByID(id uint64) error {
 	query := "DELETE FROM products WHERE id = $1;"
 	if _, err := s.db.Exec(query, id); err != nil {
 		return err
@@ -151,7 +125,7 @@ func (s *postgres) DeleteProductByID(id uint64) error {
 	return nil
 }
 
-func (s *postgres) GetProducts(username string, productName string, sortBy models.SortType) ([]models.Product, error) {
+func (r *ProductsRepository) GetProducts(username string, productName string, sortBy models.SortType) ([]models.Product, error) {
 	query := "SELECT * FROM products WHERE owner_name = $1"
 
 	if productName != "" {

@@ -9,7 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/fallra1n/product-keeper/internal/domain/models"
-	"github.com/fallra1n/product-keeper/internal/adapters/repository"
 )
 
 const (
