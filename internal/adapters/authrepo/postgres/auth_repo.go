@@ -2,12 +2,11 @@ package postgres
 
 import (
 	"database/sql"
-	"errors"
 
 	"github.com/fallra1n/product-keeper/internal/core/auth"
 	"github.com/fallra1n/product-keeper/internal/core/shared"
 	"github.com/fallra1n/product-keeper/internal/domain/models"
-
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
 
@@ -17,12 +16,26 @@ func NewAuth() *AuthRepository {
 	return &AuthRepository{}
 }
 
-func (r *AuthRepository) CreateUser(user models.User) error {
-	query := `
-		INSERT INTO users (name, password) 
-		VALUES ($1, $2);`
+func CreateTable(tx *sqlx.Tx) error {
+	sqlQuery := `
+		CREATE TABLE IF NOT EXISTS auth$users
+		(
+			name VARCHAR(255) NOT NULL UNIQUE,
+		    password VARCHAR(255) NOT NULL
+		);
+	`
 
-	if _, err := s.db.Exec(query, user.Name, user.Password); err != nil {
+	_, err := tx.Exec(sqlQuery)
+	return err
+}
+
+func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user models.User) error {
+	sqlQuery := `
+		INSERT INTO auth$users (name, password)
+		VALUES ($1, $2);
+	`
+
+	if _, err := tx.Exec(sqlQuery, user.Name, user.Password); err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" {
 				return auth.ErrUserAlreadyExist
@@ -35,16 +48,22 @@ func (r *AuthRepository) CreateUser(user models.User) error {
 	return nil
 }
 
-func (r *AuthRepository) GetPasswordByName(name string) (string, error) {
-	query := "SELECT password FROM users WHERE name = $1;"
+func (r *AuthRepository) FindPassword(tx *sqlx.Tx, name string) (string, error) {
+	sqlQuery := `
+		SELECT password
+		FROM auth$users
+		WHERE name = $1;
+	`
 
 	var user models.User
-	if err := s.db.Get(&user, query, name); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return "", shared.ErrNoData
-		}
+	err := tx.Get(&user, sqlQuery, name)
+
+	switch err {
+	case sql.ErrNoRows:
+		return "", shared.ErrNoData
+	case nil:
+		return user.Password, nil
+	default:
 		return "", err
 	}
-
-	return user.Password, nil
 }

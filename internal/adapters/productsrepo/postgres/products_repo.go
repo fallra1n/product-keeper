@@ -2,20 +2,13 @@ package postgres
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	"golang.org/x/mod/sumdb/storage"
 
-	"github.com/fallra1n/product-keeper/config"
 	"github.com/fallra1n/product-keeper/internal/core/shared"
 	"github.com/fallra1n/product-keeper/internal/domain/models"
 )
-
-type postgres struct {
-	db *sqlx.DB
-}
 
 type ProductsRepository struct{}
 
@@ -23,31 +16,8 @@ func NewProducts() *ProductsRepository {
 	return &ProductsRepository{}
 }
 
-func New(cfg *config.Config) (storage.Storage, error) {
-	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName)
-
-	db, err := sqlx.Open("postgres", connStr)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-
-	return &postgres{db}, nil
-}
-
-func (r *ProductsRepository) CreateTables() error {
-	createUser := `
-		CREATE TABLE IF NOT EXISTS users 
-		(
-			name VARCHAR(255) NOT NULL UNIQUE,
-		    password VARCHAR(255) NOT NULL
-		);`
-
-	createProduct := `
+func CreateTable(tx *sqlx.Tx) error {
+	sqlQuery := `
 		CREATE TABLE IF NOT EXISTS products
 		(
 		    id SERIAL PRIMARY KEY,
@@ -56,95 +26,118 @@ func (r *ProductsRepository) CreateTables() error {
 		    quantity INT NOT NULL,
 		    owner_name VARCHAR(255) NOT NULL,
 		    created_at TIMESTAMP NOT NULL,
-		    FOREIGN KEY (owner_name) REFERENCES users(name)
-		);`
+		    FOREIGN KEY (owner_name) REFERENCES auth$users(name)
+		);
+	`
 
-	if _, err := s.db.Exec(createUser); err != nil {
-		return err
-	}
-
-	if _, err := s.db.Exec(createProduct); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := tx.Exec(sqlQuery)
+	return err
 }
 
-func (r *ProductsRepository) CreateProduct(product models.Product) (uint64, error) {
-	query := `
+func (r *ProductsRepository) CreateProduct(tx *sqlx.Tx, product models.Product) (uint64, error) {
+	sqlQuery := `
 		INSERT INTO products (name, price, quantity, owner_name, created_at) 
 		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id;`
+		RETURNING id;
+	`
 
-	row := s.db.QueryRow(query, product.Name, product.Price, product.Quantity, product.OwnerName, product.CreatedAt)
+	row := tx.QueryRow(sqlQuery, product.Name, product.Price, product.Quantity, product.OwnerName, product.CreatedAt)
 
 	var id uint64
 	err := row.Scan(&id)
-	if err != nil {
+
+	switch err {
+	case sql.ErrNoRows:
+		return 0, shared.ErrNoData
+	case nil:
+		return id, nil
+	default:
 		return 0, err
 	}
-
-	return id, nil
 }
 
-func (r *ProductsRepository) GetProductByID(id uint64) (models.Product, error) {
-	query := "SELECT * FROM products WHERE id = $1;"
+func (r *ProductsRepository) FindProduct(tx *sqlx.Tx, id uint64) (models.Product, error) {
+	sqlQuery := `
+		SELECT * 
+		FROM products 
+		WHERE id = $1;
+	`
 
-	var product models.Product
-	if err := s.db.Get(&product, query, id); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return models.Product{}, shared.ErrNoData
-		}
+	var data models.Product
+	err := tx.Get(&data, sqlQuery, id)
+
+	switch err {
+	case sql.ErrNoRows:
+		return models.Product{}, shared.ErrNoData
+	case nil:
+		return data, nil
+	default:
 		return models.Product{}, err
 	}
-
-	return product, nil
 }
 
-func (r *ProductsRepository) UpdateProductByID(newProduct models.Product) (models.Product, error) {
-	query := `
+func (r *ProductsRepository) UpdateProduct(tx *sqlx.Tx, newProduct models.Product) (models.Product, error) {
+	sqlQuery := `
         UPDATE products
         SET name = $1, price = $2, quantity = $3
         WHERE id = $4
-        RETURNING *;`
+        RETURNING *;
+	`
 
-	var updated models.Product
-	if err := s.db.Get(&updated, query, newProduct.Name, newProduct.Price, newProduct.Quantity, newProduct.ID); err != nil {
+	var data models.Product
+	err := tx.Get(&data, sqlQuery, newProduct.Name, newProduct.Price, newProduct.Quantity, newProduct.ID)
+
+	switch err {
+	case sql.ErrNoRows:
+		return models.Product{}, shared.ErrNoData
+	case nil:
+		return data, nil
+	default:
 		return models.Product{}, err
 	}
-
-	return updated, nil
 }
 
-func (r *ProductsRepository) DeleteProductByID(id uint64) error {
-	query := "DELETE FROM products WHERE id = $1;"
-	if _, err := s.db.Exec(query, id); err != nil {
-		return err
-	}
+func (r *ProductsRepository) DeleteProduct(tx *sqlx.Tx, id uint64) error {
+	sqlQuery := `
+		DELETE 
+		FROM products
+		WHERE id = $1;
+	`
 
-	return nil
+	_, err := tx.Exec(sqlQuery, id)
+	return err
 }
 
-func (r *ProductsRepository) GetProducts(username string, productName string, sortBy models.SortType) ([]models.Product, error) {
-	query := "SELECT * FROM products WHERE owner_name = $1"
+func (r *ProductsRepository) FindProductList(tx *sqlx.Tx, username string, productName string, sortBy models.SortType) ([]models.Product, error) {
+	sqlQuery := `
+		SELECT * 
+		FROM products 
+		WHERE owner_name = $1
+	`
 
 	if productName != "" {
-		query += fmt.Sprintf(" AND name = '%s'", productName)
+		sqlQuery += fmt.Sprintf(" AND name = '%s'", productName)
 	}
 
 	switch sortBy {
 	case models.Name:
-		query += " ORDER BY name"
+		sqlQuery += " ORDER BY name"
 	case models.LastCreate:
-		query += " ORDER BY created_at DESC"
+		sqlQuery += " ORDER BY created_at DESC"
+	default:
 	}
 
-	query += ";"
+	sqlQuery += ";"
 
-	var products []models.Product
-	if err := s.db.Select(&products, query, username); err != nil {
+	var data []models.Product
+	err := tx.Select(&data, sqlQuery, username)
+
+	switch err {
+	case sql.ErrNoRows:
+		return nil, shared.ErrNoData
+	case nil:
+		return data, nil
+	default:
 		return nil, err
 	}
-
-	return products, nil
 }
