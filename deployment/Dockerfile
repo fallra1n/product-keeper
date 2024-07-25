@@ -7,8 +7,6 @@ COPY ./ ./
 RUN apk update
 RUN apk add postgresql-client
 
-RUN chmod +x wait-for-postgres.sh
-
 RUN go mod download
 RUN go build -o product-keeper ./cmd/product-keeper/main.go
 

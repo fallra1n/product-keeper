@@ -13,11 +13,12 @@ type HTTPServer struct {
 }
 
 type Postgres struct {
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	DBName   string `yaml:"dbname"`
+	Host     string        `yaml:"host"`
+	Port     string        `yaml:"port"`
+	User     string        `yaml:"user"`
+	Password string        `yaml:"password"`
+	DBName   string        `yaml:"dbname"`
+	Timeout  time.Duration `yaml:"timeout"`
 }
 
 type Config struct {

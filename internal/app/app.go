@@ -48,7 +48,7 @@ func NewApp() *App {
 	a := &App{
 		cfg:    cfg,
 		logger: logging.SetupLogger(cfg.Env),
-		db:     postgresdb.NewPostgresDB(access.PostgresConnect(cfg)),
+		db:     postgresdb.NewPostgresDB(access.PostgresConnect(cfg), cfg.Postgres.Timeout),
 
 		productsRepo: productsrepo.NewPostgresProducts(),
 		authRepo:     authrepo.NewPostgresAuth(),

@@ -10,3 +10,4 @@ postgres:
   user: "postgres"
   dbname: "postgres"
   password: "pass"
+  timeout: 60s
