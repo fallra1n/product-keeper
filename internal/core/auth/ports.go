@@ -1,8 +1,11 @@
 package auth
 
-import "github.com/fallra1n/product-keeper/internal/domain/models"
+import (
+	"github.com/fallra1n/product-keeper/internal/domain/models"
+	"github.com/jmoiron/sqlx"
+)
 
-type Users interface {
-	CreateUser(user models.User) error
-	GetPasswordByName(name string) (string, error)
+type Authrepo interface {
+	CreateUser(tx *sqlx.Tx, user models.User) error
+	FindPassword(tx *sqlx.Tx, name string) (string, error)
 }
