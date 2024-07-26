@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	TokenTTL = 5 * time.Minute
+	TokenTTL = 20 * time.Minute
 )
 
 var (
