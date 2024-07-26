@@ -1,13 +1,11 @@
-FROM golang:1.22.0-alpine
+FROM golang:1.22.0
 
 WORKDIR /app
 
 COPY ./ ./
 
-RUN apk update
-RUN apk add postgresql-client
-
 RUN go mod download
-RUN go build -o product-keeper ./cmd/product-keeper/main.go
 
-CMD ["./product-keeper"]
+RUN go build -o /app/product-keeper ./cmd/product-keeper/main.go
+
+CMD ["/app/product-keeper"]

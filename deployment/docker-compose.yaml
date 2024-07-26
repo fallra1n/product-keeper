@@ -1,9 +1,11 @@
 version: latest
 
 services:
-  app:
+  product_keeper:
     container_name: product-keeper
-    build: ./
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
     command: ./product-keeper
     ports:
       - "8080:8080"
