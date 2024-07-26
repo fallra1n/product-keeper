@@ -33,7 +33,7 @@ type App struct {
 	log *slog.Logger
 	db  *sqlx.DB
 
-	authRepo     auth.Authrepo
+	authRepo     auth.AuthRepo
 	productsRepo products.ProductsRepo
 
 	authService     *auth.AuthService

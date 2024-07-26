@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -36,7 +37,8 @@ func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user auth.User) error {
 	`
 
 	if _, err := tx.Exec(sqlQuery, user.Name, user.Password); err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
 			if pqErr.Code == "23505" {
 				return auth.ErrUserAlreadyExist
 			}
@@ -58,10 +60,10 @@ func (r *AuthRepository) FindPassword(tx *sqlx.Tx, name string) (string, error) 
 	var user auth.User
 	err := tx.Get(&user, sqlQuery, name)
 
-	switch err {
-	case sql.ErrNoRows:
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
 		return "", shared.ErrNoData
-	case nil:
+	case err == nil:
 		return user.Password, nil
 	default:
 		return "", err

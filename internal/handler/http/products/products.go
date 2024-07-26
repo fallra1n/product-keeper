@@ -209,7 +209,7 @@ func (h *ProductsHandler) FindProductList(c *gin.Context) {
 		return
 	}
 
-	products, err := h.productsService.FindProductList(username.(string), productName, sortBy)
+	productList, err := h.productsService.FindProductList(username.(string), productName, sortBy)
 	if err != nil {
 		h.log.Error("GetProducts: " + err.Error())
 		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
@@ -217,7 +217,7 @@ func (h *ProductsHandler) FindProductList(c *gin.Context) {
 	}
 
 	var productsResponse []ProductResponse
-	for _, product := range products {
+	for _, product := range productList {
 		productResponse := ProductResponse{
 			ID:        product.ID,
 			Name:      product.Name,
