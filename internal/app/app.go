@@ -45,7 +45,7 @@ type App struct {
 	httpServer *http.Server
 }
 
-func NewApp() *App {
+func NewApp() (*App, error) {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("cannot loading .env file: %s", err)
 	}
@@ -83,27 +83,27 @@ func NewApp() *App {
 	tx, err := a.db.Beginx()
 	if err != nil {
 		a.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		os.Exit(1)
+		return nil, err
 	}
 	defer tx.Rollback()
 
-	if err := productsrepoPg.CreateTable(tx); err != nil {
-		a.log.Error(fmt.Sprintf("cannot create products table in db: %s", err))
-		os.Exit(1)
-	}
-
 	if err := authrepoPg.CreateTable(tx); err != nil {
 		a.log.Error(fmt.Sprintf("cannot create auth table in db: %s", err))
-		os.Exit(1)
+		return nil, err
+	}
+
+	if err := productsrepoPg.CreateTable(tx); err != nil {
+		a.log.Error(fmt.Sprintf("cannot create products table in db: %s", err))
+		return nil, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		a.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
-		os.Exit(1)
+		return nil, err
 	}
 
-	return a
+	return a, nil
 }
 
 func (a *App) Run() {
