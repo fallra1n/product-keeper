@@ -90,10 +90,11 @@ func (h *ProductsHandler) FindProduct(c *gin.Context) {
 
 	h.log.Info("GetProductByID: product data has been successfully received")
 	c.JSON(http.StatusOK, ProductResponse{
-		ID:       product.ID,
-		Name:     product.Name,
-		Price:    product.Price,
-		Quantity: product.Quantity,
+		ID:        product.ID,
+		Name:      product.Name,
+		Price:     product.Price,
+		Quantity:  product.Quantity,
+		CreatedAt: product.CreatedAt,
 	})
 }
 
