@@ -18,7 +18,7 @@ type AuthService struct {
 	authRepo Authrepo
 }
 
-func NewAuthService(authRepo Authrepo, db *sqlx.DB, log *slog.Logger) *AuthService {
+func NewAuthService(db *sqlx.DB, log *slog.Logger, authRepo Authrepo) *AuthService {
 	return &AuthService{
 		db:  db,
 		log: log,

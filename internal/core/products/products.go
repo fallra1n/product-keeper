@@ -18,8 +18,12 @@ type ProductsService struct {
 	productsRepo ProductsRepo
 }
 
-func NewProductsService() *ProductsService {
-	return &ProductsService{}
+func NewProductsService(db *sqlx.DB, log *slog.Logger, productsRepo ProductsRepo) *ProductsService {
+	return &ProductsService{
+		db: db,
+		log: log,
+		productsRepo: productsRepo,
+	}
 }
 
 func (s *ProductsService) CreateProduct(product Product) (uint64, error) {
