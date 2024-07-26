@@ -3,11 +3,11 @@ package postgres
 import (
 	"database/sql"
 
-	"github.com/fallra1n/product-keeper/internal/core/auth"
-	"github.com/fallra1n/product-keeper/internal/core/shared"
-	"github.com/fallra1n/product-keeper/internal/domain/models"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+
+	"github.com/fallra1n/product-keeper/internal/core/auth"
+	"github.com/fallra1n/product-keeper/internal/core/shared"
 )
 
 type AuthRepository struct{}
@@ -29,7 +29,7 @@ func CreateTable(tx *sqlx.Tx) error {
 	return err
 }
 
-func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user models.User) error {
+func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user auth.User) error {
 	sqlQuery := `
 		INSERT INTO auth$users (name, password)
 		VALUES ($1, $2);
@@ -55,7 +55,7 @@ func (r *AuthRepository) FindPassword(tx *sqlx.Tx, name string) (string, error) 
 		WHERE name = $1;
 	`
 
-	var user models.User
+	var user auth.User
 	err := tx.Get(&user, sqlQuery, name)
 
 	switch err {

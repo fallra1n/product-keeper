@@ -6,8 +6,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/fallra1n/product-keeper/internal/core/products"
 	"github.com/fallra1n/product-keeper/internal/core/shared"
-	"github.com/fallra1n/product-keeper/internal/domain/models"
 )
 
 type ProductsRepository struct{}
@@ -34,7 +34,7 @@ func CreateTable(tx *sqlx.Tx) error {
 	return err
 }
 
-func (r *ProductsRepository) CreateProduct(tx *sqlx.Tx, product models.Product) (uint64, error) {
+func (r *ProductsRepository) CreateProduct(tx *sqlx.Tx, product products.Product) (uint64, error) {
 	sqlQuery := `
 		INSERT INTO products (name, price, quantity, owner_name, created_at) 
 		VALUES ($1, $2, $3, $4, $5)
@@ -56,27 +56,27 @@ func (r *ProductsRepository) CreateProduct(tx *sqlx.Tx, product models.Product) 
 	}
 }
 
-func (r *ProductsRepository) FindProduct(tx *sqlx.Tx, id uint64) (models.Product, error) {
+func (r *ProductsRepository) FindProduct(tx *sqlx.Tx, id uint64) (products.Product, error) {
 	sqlQuery := `
 		SELECT * 
 		FROM products 
 		WHERE id = $1;
 	`
 
-	var data models.Product
+	var data products.Product
 	err := tx.Get(&data, sqlQuery, id)
 
 	switch err {
 	case sql.ErrNoRows:
-		return models.Product{}, shared.ErrNoData
+		return products.Product{}, shared.ErrNoData
 	case nil:
 		return data, nil
 	default:
-		return models.Product{}, err
+		return products.Product{}, err
 	}
 }
 
-func (r *ProductsRepository) UpdateProduct(tx *sqlx.Tx, newProduct models.Product) (models.Product, error) {
+func (r *ProductsRepository) UpdateProduct(tx *sqlx.Tx, newProduct products.Product) (products.Product, error) {
 	sqlQuery := `
         UPDATE products
         SET name = $1, price = $2, quantity = $3
@@ -84,16 +84,16 @@ func (r *ProductsRepository) UpdateProduct(tx *sqlx.Tx, newProduct models.Produc
         RETURNING *;
 	`
 
-	var data models.Product
+	var data products.Product
 	err := tx.Get(&data, sqlQuery, newProduct.Name, newProduct.Price, newProduct.Quantity, newProduct.ID)
 
 	switch err {
 	case sql.ErrNoRows:
-		return models.Product{}, shared.ErrNoData
+		return products.Product{}, shared.ErrNoData
 	case nil:
 		return data, nil
 	default:
-		return models.Product{}, err
+		return products.Product{}, err
 	}
 }
 
@@ -108,7 +108,7 @@ func (r *ProductsRepository) DeleteProduct(tx *sqlx.Tx, id uint64) error {
 	return err
 }
 
-func (r *ProductsRepository) FindProductList(tx *sqlx.Tx, username string, productName string, sortBy models.SortType) ([]models.Product, error) {
+func (r *ProductsRepository) FindProductList(tx *sqlx.Tx, username string, productName string, sortBy products.SortType) ([]products.Product, error) {
 	sqlQuery := `
 		SELECT * 
 		FROM products 
@@ -120,16 +120,16 @@ func (r *ProductsRepository) FindProductList(tx *sqlx.Tx, username string, produ
 	}
 
 	switch sortBy {
-	case models.Name:
+	case products.Name:
 		sqlQuery += " ORDER BY name"
-	case models.LastCreate:
+	case products.LastCreate:
 		sqlQuery += " ORDER BY created_at DESC"
 	default:
 	}
 
 	sqlQuery += ";"
 
-	var data []models.Product
+	var data []products.Product
 	err := tx.Select(&data, sqlQuery, username)
 
 	switch err {
