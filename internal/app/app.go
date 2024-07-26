@@ -15,9 +15,7 @@ import (
 
 	"github.com/fallra1n/product-keeper/config"
 	"github.com/fallra1n/product-keeper/internal/adapters/authrepo"
-	authrepoPg "github.com/fallra1n/product-keeper/internal/adapters/authrepo/postgres"
 	"github.com/fallra1n/product-keeper/internal/adapters/productsrepo"
-	productsrepoPg "github.com/fallra1n/product-keeper/internal/adapters/productsrepo/postgres"
 	"github.com/fallra1n/product-keeper/internal/core/auth"
 	"github.com/fallra1n/product-keeper/internal/core/products"
 	httphandler "github.com/fallra1n/product-keeper/internal/handler/http"
@@ -77,30 +75,6 @@ func NewApp() (*App, error) {
 		Handler:      router,
 		ReadTimeout:  a.cfg.HTTPServer.Timeout,
 		WriteTimeout: a.cfg.HTTPServer.Timeout,
-	}
-
-	// tables init
-	tx, err := a.db.Beginx()
-	if err != nil {
-		a.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return nil, err
-	}
-	defer tx.Rollback()
-
-	if err := authrepoPg.CreateTable(tx); err != nil {
-		a.log.Error(fmt.Sprintf("cannot create auth table in db: %s", err))
-		return nil, err
-	}
-
-	if err := productsrepoPg.CreateTable(tx); err != nil {
-		a.log.Error(fmt.Sprintf("cannot create products table in db: %s", err))
-		return nil, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		a.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
-		return nil, err
 	}
 
 	return a, nil

@@ -17,19 +17,6 @@ func NewAuth() *AuthRepository {
 	return &AuthRepository{}
 }
 
-func CreateTable(tx *sqlx.Tx) error {
-	sqlQuery := `
-		CREATE TABLE IF NOT EXISTS auth$users
-		(
-			name VARCHAR(255) NOT NULL UNIQUE,
-		    password VARCHAR(255) NOT NULL
-		);
-	`
-
-	_, err := tx.Exec(sqlQuery)
-	return err
-}
-
 func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user auth.User) error {
 	sqlQuery := `
 		INSERT INTO auth$users (name, password)

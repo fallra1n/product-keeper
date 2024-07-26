@@ -16,24 +16,6 @@ func NewProducts() *ProductsRepository {
 	return &ProductsRepository{}
 }
 
-func CreateTable(tx *sqlx.Tx) error {
-	sqlQuery := `
-		CREATE TABLE IF NOT EXISTS products
-		(
-		    id SERIAL PRIMARY KEY,
-		    name VARCHAR(255) NOT NULL,
-		    price INT NOT NULL,
-		    quantity INT NOT NULL,
-		    owner_name VARCHAR(255) NOT NULL,
-		    created_at TIMESTAMP NOT NULL,
-		    FOREIGN KEY (owner_name) REFERENCES auth$users(name)
-		);
-	`
-
-	_, err := tx.Exec(sqlQuery)
-	return err
-}
-
 func (r *ProductsRepository) CreateProduct(tx *sqlx.Tx, product products.Product) (uint64, error) {
 	sqlQuery := `
 		INSERT INTO products (name, price, quantity, owner_name, created_at) 
