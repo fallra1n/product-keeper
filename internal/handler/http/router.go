@@ -1,4 +1,4 @@
-package http
+package httphandler
 
 import (
 	"log/slog"
@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(auth AuthHandler, productHandlers ProductsHandler, logger *slog.Logger) *gin.Engine {
+func SetupRouter(log *slog.Logger, auth AuthHandler, productHandlers ProductsHandler) *gin.Engine {
 	router := gin.Default()
 
 	// TODO using custom logger
@@ -17,15 +17,15 @@ func SetupRouter(auth AuthHandler, productHandlers ProductsHandler, logger *slog
 
 	products := router.Group("/products", middleware.UserIdentity())
 	{
-		products.GET("", productHandlers.GetProducts)
+		products.GET("", productHandlers.FindProductList)
 	}
 
 	product := router.Group("/product", middleware.UserIdentity())
 	{
 		product.POST("/add", productHandlers.CreateProduct)
-		product.GET("/:id", productHandlers.GetProductByID)
-		product.PUT("/:id", productHandlers.UpdateProductByID)
-		product.DELETE("/:id", productHandlers.DeleteProductByID)
+		product.GET("/:id", productHandlers.FindProduct)
+		product.PUT("/:id", productHandlers.UpdateProduct)
+		product.DELETE("/:id", productHandlers.DeleteProduct)
 	}
 
 	return router

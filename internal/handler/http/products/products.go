@@ -12,20 +12,20 @@ import (
 	"github.com/fallra1n/product-keeper/internal/handler/http/middleware"
 )
 
-type ProductHandler struct {
+type ProductsHandler struct {
 	log *slog.Logger
 
 	productsService *products.ProductsService
 }
 
-func NewProductHandler(productsService *products.ProductsService, log *slog.Logger) *ProductHandler {
-	return &ProductHandler{
+func NewProductsHandler(log *slog.Logger, productsService *products.ProductsService) *ProductsHandler {
+	return &ProductsHandler{
 		log:             log,
 		productsService: productsService,
 	}
 }
 
-func (h *ProductHandler) CreateProduct(c *gin.Context) {
+func (h *ProductsHandler) CreateProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
 		return
@@ -56,7 +56,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	})
 }
 
-func (h *ProductHandler) FindProduct(c *gin.Context) {
+func (h *ProductsHandler) FindProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
 		return
@@ -97,7 +97,7 @@ func (h *ProductHandler) FindProduct(c *gin.Context) {
 	})
 }
 
-func (h *ProductHandler) UpdateProduct(c *gin.Context) {
+func (h *ProductsHandler) UpdateProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
 		return
@@ -151,7 +151,7 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	})
 }
 
-func (h *ProductHandler) DeleteProduct(c *gin.Context) {
+func (h *ProductsHandler) DeleteProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
 		return
@@ -186,7 +186,7 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, DefaultResponse{"product has been successfully deleted"})
 }
 
-func (h *ProductHandler) GetProducts(c *gin.Context) {
+func (h *ProductsHandler) FindProductList(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
 		return
