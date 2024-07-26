@@ -44,7 +44,7 @@ func (s *ProductsService) CreateProduct(product Product) (uint64, error) {
 	return id, nil
 }
 
-func (s *ProductsService) GetProductByID(id uint64, username string) (Product, error) {
+func (s *ProductsService) FindProduct(id uint64, username string) (Product, error) {
 	tx, err := s.db.Beginx()
 	if err != nil {
 		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
@@ -73,7 +73,7 @@ func (s *ProductsService) GetProductByID(id uint64, username string) (Product, e
 	return product, nil
 }
 
-func (s *ProductsService) UpdateProductByID(newProduct Product) (Product, error) {
+func (s *ProductsService) UpdateProduct(newProduct Product) (Product, error) {
 	tx, err := s.db.Beginx()
 	if err != nil {
 		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
@@ -107,7 +107,7 @@ func (s *ProductsService) UpdateProductByID(newProduct Product) (Product, error)
 	return product, nil
 }
 
-func (s *ProductsService) DeleteProductByID(id uint64, username string) error {
+func (s *ProductsService) DeleteProduct(id uint64, username string) error {
 	tx, err := s.db.Beginx()
 	if err != nil {
 		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
@@ -140,7 +140,7 @@ func (s *ProductsService) DeleteProductByID(id uint64, username string) error {
 	return nil
 }
 
-func (s *ProductsService) GetProducts(username string, productName string, sortBy SortType) ([]Product, error) {
+func (s *ProductsService) FindProductList(username string, productName string, sortBy SortType) ([]Product, error) {
 	tx, err := s.db.Beginx()
 	if err != nil {
 		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))

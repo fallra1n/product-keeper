@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/fallra1n/product-keeper/pkg/jwt"
 )
 
 type AuthService struct {
@@ -81,7 +81,7 @@ func (s *AuthService) LoginUser(user User) (string, error) {
 		return "", ErrIncorrectPassword
 	}
 
-	token, err := s.generateToken(user.Name)
+	token, err := jwt.GenerateToken(user.Name)
 	if err != nil {
 		return "", err
 	}
@@ -101,42 +101,4 @@ func (s *AuthService) hashPassword(password string) (string, error) {
 	}
 
 	return string(hash), nil
-}
-
-func (s *AuthService) generateToken(username string) (string, error) {
-	claims := &tokenClaims{
-		Username: username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenTTL)),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString([]byte(jwtSecret))
-	if err != nil {
-		return "", ErrFailedGenerateToken
-	}
-
-	return tokenString, nil
-}
-
-func (s *AuthService) ParseToken(tokenString string) (string, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSecret), nil
-	})
-	if err != nil {
-		return "", ErrFailedParseToken
-	}
-
-	if !token.Valid {
-		return "", ErrInvalidToken
-	}
-
-	claims, ok := token.Claims.(*tokenClaims)
-	if !ok {
-		return "", ErrInvalidTokenClaimsType
-	}
-
-	return claims.Username, err
 }
