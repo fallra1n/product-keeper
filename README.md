@@ -10,7 +10,7 @@ JWT_SECRET=qwerty
 ```
 
 ```shell
-docker-compose up --build 
+make run
 ```
 
 ## Примеры взаимодействия с API
