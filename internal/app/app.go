@@ -10,84 +10,67 @@ import (
 	"os"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
+
 	"github.com/fallra1n/product-keeper/config"
 	"github.com/fallra1n/product-keeper/internal/adapters/authrepo"
 	authrepoPg "github.com/fallra1n/product-keeper/internal/adapters/authrepo/postgres"
 	"github.com/fallra1n/product-keeper/internal/adapters/productsrepo"
 	productsrepoPg "github.com/fallra1n/product-keeper/internal/adapters/productsrepo/postgres"
-	services "github.com/fallra1n/product-keeper/internal/core"
 	"github.com/fallra1n/product-keeper/internal/core/auth"
 	"github.com/fallra1n/product-keeper/internal/core/products"
-	httphandler "github.com/fallra1n/product-keeper/internal/http-handler"
+	httphandler "github.com/fallra1n/product-keeper/internal/handler/http"
+	authhttphandler "github.com/fallra1n/product-keeper/internal/handler/http/auth"
+	productshttphandler "github.com/fallra1n/product-keeper/internal/handler/http/products"
 	"github.com/fallra1n/product-keeper/pkg/access"
 	"github.com/fallra1n/product-keeper/pkg/logging"
 	"github.com/fallra1n/product-keeper/pkg/postgresdb"
-	"github.com/jmoiron/sqlx"
-	"github.com/joho/godotenv"
 )
 
 type App struct {
-	cfg    *config.Config
-	logger *slog.Logger
-	db     *sqlx.DB
+	cfg *config.Config
+	log *slog.Logger
+	db  *sqlx.DB
 
-	productsRepo products.ProductsRepo
 	authRepo     auth.Authrepo
+	productsRepo products.ProductsRepo
+
+	authService     *auth.AuthService
+	productsService *products.ProductsService
+
+	authHandler     httphandler.AuthHandler
+	productsHandler httphandler.ProductsHandler
 
 	httpServer *http.Server
 }
 
 func NewApp() *App {
-	log.Println("env initializing")
 	if err := godotenv.Load(); err != nil {
-		log.Println("cannot loading .env file: " + err.Error())
+		log.Printf("cannot loading .env file: %s", err)
 	}
 
 	cfg := config.MustLoad()
 
 	a := &App{
-		cfg:    cfg,
-		logger: logging.SetupLogger(cfg.Env),
-		db:     postgresdb.NewPostgresDB(access.PostgresConnect(cfg), cfg.Postgres.Timeout),
+		cfg: cfg,
+		log: logging.SetupLogger(cfg.Env),
+		db:  postgresdb.NewPostgresDB(access.PostgresConnect(cfg), cfg.Postgres.Timeout),
 
 		productsRepo: productsrepo.NewPostgresProducts(),
 		authRepo:     authrepo.NewPostgresAuth(),
 	}
 
-	// tables init
-	tx, err := a.db.Beginx()
-	if err != nil {
-		a.logger.Error("cannot start transaction:", err)
-		os.Exit(1)
-	}
-	defer tx.Rollback()
+	// services init
+	a.authService = auth.NewAuthService(a.db, a.log, a.authRepo)
+	a.productsService = products.NewProductsService(a.db, a.log, a.productsRepo)
 
-	if err := productsrepoPg.CreateTable(tx); err != nil {
-		a.logger.Error("cannot create products table in db:", err)
-		os.Exit(1)
-	}
+	// http handlers init
+	a.authHandler = authhttphandler.NewAuthHandler(a.log, a.authService)
+	a.productsHandler = productshttphandler.NewProductsHandler(a.log, a.productsService)
 
-	if err := authrepoPg.CreateTable(tx); err != nil {
-		a.logger.Error("cannot create auth table in db:", err)
-		os.Exit(1)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		a.logger.Error("cannot commit transaction:", err)
-		os.Exit(1)
-	}
-
-	return a
-}
-
-func (a *App) Run() {
-	servs := services.NewServices(s)
-
-	ah := httphandler.NewAuthHandler(servs, a.logger)
-	prh := httphandler.NewProductHandler(servs, a.logger)
-
-	router := httphandler.SetupRouter(ah, prh, a.logger)
+	// http server init
+	router := httphandler.SetupRouter(a.log, a.authHandler, a.productsHandler)
 
 	a.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%s", a.cfg.HTTPServer.Port),
@@ -96,12 +79,38 @@ func (a *App) Run() {
 		WriteTimeout: a.cfg.HTTPServer.Timeout,
 	}
 
-	go func() {
-		if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			a.logger.Error("error ocurred while running http-server server: %s", err.Error())
-			os.Exit(1)
-		}
-	}()
+	// tables init
+	tx, err := a.db.Beginx()
+	if err != nil {
+		a.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		os.Exit(1)
+	}
+	defer tx.Rollback()
+
+	if err := productsrepoPg.CreateTable(tx); err != nil {
+		a.log.Error(fmt.Sprintf("cannot create products table in db: %s", err))
+		os.Exit(1)
+	}
+
+	if err := authrepoPg.CreateTable(tx); err != nil {
+		a.log.Error(fmt.Sprintf("cannot create auth table in db: %s", err))
+		os.Exit(1)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		a.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
+		os.Exit(1)
+	}
+
+	return a
+}
+
+func (a *App) Run() {
+	if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		a.log.Error(fmt.Sprintf("error ocurred while running http-server server: %s", err))
+		os.Exit(1)
+	}
 }
 
 func (a *App) Close() error {
