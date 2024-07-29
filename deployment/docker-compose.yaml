@@ -1,4 +1,4 @@
-version: latest
+version: "3.1"
 
 services:
   product_keeper:
@@ -11,6 +11,7 @@ services:
       - "8080:8080"
     depends_on:
       - db
+      - kafka
   db:
     container_name: postgres
     image: postgres:latest
@@ -21,3 +22,23 @@ services:
       POSTGRES_PASSWORD: "pass"
     ports:
       - "5432:5432"
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
