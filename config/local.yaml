@@ -11,3 +11,9 @@ postgres:
   dbname: "postgres"
   password: "pass"
   timeout: 60s
+
+kafka:
+  replication_factor: 1
+  brokers:
+    - host: "kafka-1"
+      port: "9092"
