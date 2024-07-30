@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 
@@ -22,14 +23,17 @@ import (
 	authhttphandler "github.com/fallra1n/product-keeper/internal/handler/http/auth"
 	productshttphandler "github.com/fallra1n/product-keeper/internal/handler/http/products"
 	"github.com/fallra1n/product-keeper/pkg/access"
+	"github.com/fallra1n/product-keeper/pkg/kafka"
 	"github.com/fallra1n/product-keeper/pkg/logging"
 	"github.com/fallra1n/product-keeper/pkg/postgresdb"
 )
 
+// App application
 type App struct {
-	cfg *config.Config
-	log *slog.Logger
-	db  *sqlx.DB
+	cfg               *config.Config
+	log               *slog.Logger
+	db                *sqlx.DB
+	kafkaSyncProducer sarama.SyncProducer
 
 	authRepo     auth.AuthRepo
 	productsRepo products.ProductsRepo
@@ -43,6 +47,7 @@ type App struct {
 	httpServer *http.Server
 }
 
+// NewApp creating new app
 func NewApp() (*App, error) {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("cannot loading .env file: %s", err)
@@ -51,9 +56,10 @@ func NewApp() (*App, error) {
 	cfg := config.MustLoad()
 
 	a := &App{
-		cfg: cfg,
-		log: logging.SetupLogger(cfg.Env),
-		db:  postgresdb.NewPostgresDB(access.PostgresConnect(cfg), cfg.Postgres.Timeout),
+		cfg:               cfg,
+		log:               logging.SetupLogger(cfg.Env),
+		db:                postgresdb.NewPostgresDB(access.PostgresConnect(cfg), cfg.Postgres.Timeout),
+		kafkaSyncProducer: kafka.NewKafkaSyncProducer(access.KafkaConnect(cfg)),
 
 		productsRepo: productsrepo.NewPostgresProducts(),
 		authRepo:     authrepo.NewPostgresAuth(),
@@ -71,7 +77,7 @@ func NewApp() (*App, error) {
 	router := httphandler.SetupRouter(a.log, a.authHandler, a.productsHandler)
 
 	a.httpServer = &http.Server{
-		Addr:         fmt.Sprintf(":%s", a.cfg.HTTPServer.Port),
+		Addr:         fmt.Sprintf("0.0.0.0:%s", a.cfg.HTTPServer.Port),
 		Handler:      router,
 		ReadTimeout:  a.cfg.HTTPServer.Timeout,
 		WriteTimeout: a.cfg.HTTPServer.Timeout,
