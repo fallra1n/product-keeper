@@ -59,7 +59,7 @@ func NewApp() (*App, error) {
 		cfg:               cfg,
 		log:               logging.SetupLogger(cfg.Env),
 		db:                postgresdb.NewPostgresDB(access.PostgresConnect(cfg), cfg.Postgres.Timeout),
-		kafkaSyncProducer: kafka.NewKafkaSyncProducer(access.KafkaConnect(cfg)),
+		kafkaSyncProducer: kafka.NewSyncProducer(access.KafkaConnect(cfg)),
 
 		productsRepo: productsrepo.NewPostgresProducts(),
 		authRepo:     authrepo.NewPostgresAuth(),
