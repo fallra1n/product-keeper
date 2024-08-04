@@ -15,14 +15,21 @@ type ProductsService struct {
 	db  *sqlx.DB
 	log *slog.Logger
 
-	productsRepo ProductsRepo
+	productsRepo       ProductsRepo
+	productsStatistics ProductsStatistics
 }
 
-func NewProductsService(db *sqlx.DB, log *slog.Logger, productsRepo ProductsRepo) *ProductsService {
+func NewProductsService(
+	db *sqlx.DB,
+	log *slog.Logger,
+	productsRepo ProductsRepo,
+	productsStatistics ProductsStatistics,
+) *ProductsService {
 	return &ProductsService{
-		db: db,
-		log: log,
-		productsRepo: productsRepo,
+		db:                 db,
+		log:                log,
+		productsRepo:       productsRepo,
+		productsStatistics: productsStatistics,
 	}
 }
 
@@ -67,6 +74,11 @@ func (s *ProductsService) FindProduct(id uint64, username string) (Product, erro
 
 	if product.OwnerName != username {
 		return Product{}, ErrPermissionDenied
+	}
+
+	if err := s.productsStatistics.Send(product); err != nil {
+		s.log.Error(fmt.Sprintf("cannot send product view to statistics: %s", err))
+		return Product{}, shared.ErrInternal
 	}
 
 	if err := tx.Commit(); err != nil {

@@ -19,10 +19,10 @@ const (
 )
 
 type Product struct {
-	ID        uint64    `db:"id"`
-	Name      string    `db:"name"`
-	Price     uint64    `db:"price"`
-	Quantity  uint64    `db:"quantity"`
-	OwnerName string    `db:"owner_name"`
-	CreatedAt time.Time `db:"created_at"`
+	ID        uint64    `json:"id" db:"id"`
+	Name      string    `json:"name" db:"name"`
+	Price     uint64    `json:"price" db:"price"`
+	Quantity  uint64    `json:"quantity" db:"quantity"`
+	OwnerName string    `json:"owner_name" db:"owner_name"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }

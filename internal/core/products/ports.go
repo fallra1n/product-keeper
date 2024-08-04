@@ -11,3 +11,7 @@ type ProductsRepo interface {
 	DeleteProduct(tx *sqlx.Tx, id uint64) error
 	FindProductList(tx *sqlx.Tx, username string, productName string, sortBy SortType) ([]Product, error)
 }
+
+type ProductsStatistics interface {
+	Send(p Product) error
+}
