@@ -16,6 +16,7 @@ import (
 
 	"github.com/fallra1n/product-keeper/config"
 	"github.com/fallra1n/product-keeper/internal/adapters/authrepo"
+	productsstatistics "github.com/fallra1n/product-keeper/internal/adapters/products-statistics"
 	"github.com/fallra1n/product-keeper/internal/adapters/productsrepo"
 	"github.com/fallra1n/product-keeper/internal/core/auth"
 	"github.com/fallra1n/product-keeper/internal/core/products"
@@ -35,8 +36,9 @@ type App struct {
 	db                *sqlx.DB
 	kafkaSyncProducer sarama.SyncProducer
 
-	authRepo     auth.AuthRepo
-	productsRepo products.ProductsRepo
+	authRepo           auth.AuthRepo
+	productsRepo       products.ProductsRepo
+	productsStatistics products.ProductsStatistics
 
 	authService     *auth.AuthService
 	productsService *products.ProductsService
@@ -65,9 +67,11 @@ func NewApp() (*App, error) {
 		authRepo:     authrepo.NewPostgresAuth(),
 	}
 
+	a.productsStatistics = productsstatistics.NewKafkaProducts(a.kafkaSyncProducer)
+
 	// services init
 	a.authService = auth.NewAuthService(a.db, a.log, a.authRepo)
-	a.productsService = products.NewProductsService(a.db, a.log, a.productsRepo)
+	a.productsService = products.NewProductsService(a.db, a.log, a.productsRepo, a.productsStatistics)
 
 	// http handlers init
 	a.authHandler = authhttphandler.NewAuthHandler(a.log, a.authService)
