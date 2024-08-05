@@ -24,6 +24,17 @@ services:
     ports:
       - "5432:5432"
 
+  test-db:
+    container_name: postgres-test
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "pass"
+    ports:
+      - "5433:5432"
+
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: zookeeper
