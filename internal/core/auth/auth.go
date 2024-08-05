@@ -30,10 +30,7 @@ func (s *AuthService) CreateUser(tx *sqlx.Tx, user User) error {
 		return err
 	}
 
-	hashedUser := User{
-		Name:     user.Name,
-		Password: hash,
-	}
+	hashedUser := NewUser(user.Name, hash)
 
 	if err := s.authRepo.CreateUser(tx, hashedUser); err != nil {
 		if errors.Is(err, ErrUserAlreadyExist) {

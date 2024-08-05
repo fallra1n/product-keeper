@@ -11,7 +11,15 @@ var (
 	ErrUserAlreadyExist      = errors.New("user already exists")
 )
 
+// User user info for auth
 type User struct {
 	Name     string `db:"name"`
 	Password string `db:"password"`
+}
+
+func NewUser(name string, password string) User {
+	return User{
+		Name:     name,
+		Password: password,
+	}
 }

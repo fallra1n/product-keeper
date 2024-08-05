@@ -45,10 +45,9 @@ func (h *AuthHandler) UserRegister(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	err = h.authService.CreateUser(tx, auth.User{
-		Name:     req.Name,
-		Password: req.Password,
-	})
+	err = h.authService.CreateUser(tx, auth.NewUser(
+		req.Name, req.Password,
+	))
 
 	if err != nil {
 		if errors.Is(err, auth.ErrFailedHashingPassword) {
@@ -94,10 +93,10 @@ func (h *AuthHandler) UserLogin(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	token, err := h.authService.LoginUser(tx, auth.User{
-		Name:     req.Name,
-		Password: req.Password,
-	})
+	token, err := h.authService.LoginUser(tx, auth.NewUser(
+		req.Name,
+		req.Password,
+	))
 
 	if err != nil {
 		if errors.Is(err, auth.ErrIncorrectPassword) {
