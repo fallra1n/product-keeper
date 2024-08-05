@@ -16,7 +16,7 @@ test_adapter: no_test_cache
 build:
 	cd deployment && docker compose build --no-cache
 
-run: build
+run: test_core test_adapter build
 	cd deployment && docker compose -p ${NAME} up --force-recreate --remove-orphans --build
 
 .PHONY: no_test_cache

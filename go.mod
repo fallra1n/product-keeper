@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
