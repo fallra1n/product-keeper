@@ -1,9 +1,6 @@
-## Запуск
+## Run
 
-Перед запуском нужно установить переменные окружения в файле .env
-Нужно указать CONFIG_PATH и JWT_SECRET
-
-Например:
+Set env variables CONFIG_PATH and JWT_SECRET before run:
 ```shell
 CONFIG_PATH=config/local.yaml
 JWT_SECRET=qwerty
@@ -13,11 +10,11 @@ JWT_SECRET=qwerty
 make run
 ```
 
-После примените все миграции из папки [migrations](migrations/).
+After apply all migrations from folder [migrations](migrations/).
 
-## Примеры взаимодействия с API
+## Examples
 
-* Регистрация пользователя:
+* User registration:
     ```shell
     curl -X POST \
     -H "Content-Type: application/json" \
@@ -25,7 +22,7 @@ make run
     'http://localhost:8080/user/register'
     ```
 
-* Авторизация:
+* Login:
     ```shell
     curl -X POST \
     -H "Content-Type: application/json" \
@@ -33,7 +30,7 @@ make run
     'http://localhost:8080/user/login'
     ```
 
-* Создание продукта:
+* Create a product:
     ```shell
     curl -X 'POST' \
     -H 'Content-Type: application/json' \
@@ -46,7 +43,7 @@ make run
     'http://localhost:8080/product/add'
     ```
 
-* Получить продукт по ID:
+* Get product by id:
     ```shell
     curl -X 'GET' \
     -H 'Content-Type: application/json' \
@@ -54,7 +51,7 @@ make run
     'http://localhost:8080/product/${ID?}
     ```
 
-* Редактировать продукт по ID:
+* Update product by id:
     ```shell
     curl -X 'PUT' \
     -H 'Content-Type: application/json' \
@@ -67,7 +64,7 @@ make run
     'http://localhost:8080/product/${ID?}'
     ```
   
-* Удалить продукт по ID:
+* Delete product by id:
     ```shell
     curl -X 'DELETE' \
     -H 'Content-Type: application/json' \
@@ -75,7 +72,7 @@ make run
     'http://localhost:8080/product/${ID?}'
     ```
   
-* Получить продукты:
+* Get all products:
     ```shell
     curl -X 'GET' \
     -H 'Content-Type: application/json' \
