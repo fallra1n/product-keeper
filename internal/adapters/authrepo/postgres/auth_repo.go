@@ -26,8 +26,12 @@ func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user auth.User) error {
 	if _, err := tx.Exec(sqlQuery, user.Name, user.Password); err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
-			if pqErr.Code == "23505" {
+			switch pqErr.Code {
+			case "02000":
+				return shared.ErrNoData
+			case "23505":
 				return auth.ErrUserAlreadyExist
+			default:
 			}
 		}
 
