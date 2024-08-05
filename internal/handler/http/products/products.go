@@ -2,11 +2,13 @@ package productshttphandler
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/fallra1n/product-keeper/internal/core/products"
 	"github.com/fallra1n/product-keeper/internal/handler/http/middleware"
@@ -14,13 +16,16 @@ import (
 
 type ProductsHandler struct {
 	log *slog.Logger
+	db  *sqlx.DB
 
 	productsService *products.ProductsService
 }
 
-func NewProductsHandler(log *slog.Logger, productsService *products.ProductsService) *ProductsHandler {
+func NewProductsHandler(log *slog.Logger, db *sqlx.DB, productsService *products.ProductsService) *ProductsHandler {
 	return &ProductsHandler{
-		log:             log,
+		log: log,
+		db:  db,
+
 		productsService: productsService,
 	}
 }
@@ -38,7 +43,15 @@ func (h *ProductsHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	id, err := h.productsService.CreateProduct(products.Product{
+	tx, err := h.db.Beginx()
+	if err != nil {
+		h.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+	defer tx.Rollback()
+
+	id, err := h.productsService.CreateProduct(tx, products.Product{
 		Name:      req.Name,
 		Price:     req.Price,
 		Quantity:  req.Quantity,
@@ -47,6 +60,12 @@ func (h *ProductsHandler) CreateProduct(c *gin.Context) {
 	if err != nil {
 		h.log.Error("CreateProduct: " + err.Error())
 		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		h.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
 		return
 	}
 
@@ -69,7 +88,15 @@ func (h *ProductsHandler) FindProduct(c *gin.Context) {
 		return
 	}
 
-	product, err := h.productsService.FindProduct(id, username.(string))
+	tx, err := h.db.Beginx()
+	if err != nil {
+		h.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+	defer tx.Rollback()
+
+	product, err := h.productsService.FindProduct(tx, id, username.(string))
 	if err != nil {
 		if errors.Is(err, products.ErrProductNotFound) {
 			h.log.Error("GetProductByID: " + err.Error())
@@ -85,6 +112,12 @@ func (h *ProductsHandler) FindProduct(c *gin.Context) {
 
 		h.log.Error("GetProductByID: " + err.Error())
 		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		h.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
 		return
 	}
 
@@ -118,7 +151,15 @@ func (h *ProductsHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	updated, err := h.productsService.UpdateProduct(products.Product{
+	tx, err := h.db.Beginx()
+	if err != nil {
+		h.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+	defer tx.Rollback()
+
+	updated, err := h.productsService.UpdateProduct(tx, products.Product{
 		ID:        id,
 		Name:      req.Name,
 		Price:     req.Price,
@@ -140,6 +181,12 @@ func (h *ProductsHandler) UpdateProduct(c *gin.Context) {
 
 		h.log.Error("UpdateProductByID: " + err.Error())
 		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		h.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
 		return
 	}
 
@@ -165,7 +212,15 @@ func (h *ProductsHandler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	if err := h.productsService.DeleteProduct(id, username.(string)); err != nil {
+	tx, err := h.db.Beginx()
+	if err != nil {
+		h.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+	defer tx.Rollback()
+
+	if err := h.productsService.DeleteProduct(tx, id, username.(string)); err != nil {
 		if errors.Is(err, products.ErrProductNotFound) {
 			h.log.Error("DeleteProductByID: " + err.Error())
 			c.JSON(http.StatusNotFound, DefaultResponse{"product with such id does not exist"})
@@ -180,6 +235,12 @@ func (h *ProductsHandler) DeleteProduct(c *gin.Context) {
 
 		h.log.Error("DeleteProductByID: " + err.Error())
 		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		h.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
 		return
 	}
 
@@ -210,10 +271,24 @@ func (h *ProductsHandler) FindProductList(c *gin.Context) {
 		return
 	}
 
-	productList, err := h.productsService.FindProductList(username.(string), productName, sortBy)
+	tx, err := h.db.Beginx()
+	if err != nil {
+		h.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+	defer tx.Rollback()
+
+	productList, err := h.productsService.FindProductList(tx, username.(string), productName, sortBy)
 	if err != nil {
 		h.log.Error("GetProducts: " + err.Error())
 		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		h.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
 		return
 	}
 

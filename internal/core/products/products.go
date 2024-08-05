@@ -12,7 +12,6 @@ import (
 )
 
 type ProductsService struct {
-	db  *sqlx.DB
 	log *slog.Logger
 
 	productsRepo       ProductsRepo
@@ -20,49 +19,29 @@ type ProductsService struct {
 }
 
 func NewProductsService(
-	db *sqlx.DB,
 	log *slog.Logger,
 	productsRepo ProductsRepo,
 	productsStatistics ProductsStatistics,
 ) *ProductsService {
 	return &ProductsService{
-		db:                 db,
 		log:                log,
 		productsRepo:       productsRepo,
 		productsStatistics: productsStatistics,
 	}
 }
 
-func (s *ProductsService) CreateProduct(product Product) (uint64, error) {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return 0, err
-	}
-	defer tx.Rollback()
-
+func (s *ProductsService) CreateProduct(tx *sqlx.Tx, product Product) (uint64, error) {
 	product.CreatedAt = time.Now()
+
 	id, err := s.productsRepo.CreateProduct(tx, product)
 	if err != nil {
-		return 0, err
-	}
-
-	if err := tx.Commit(); err != nil {
-		s.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
 		return 0, err
 	}
 
 	return id, nil
 }
 
-func (s *ProductsService) FindProduct(id uint64, username string) (Product, error) {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return Product{}, err
-	}
-	defer tx.Rollback()
-
+func (s *ProductsService) FindProduct(tx *sqlx.Tx, id uint64, username string) (Product, error) {
 	product, err := s.productsRepo.FindProduct(tx, id)
 	if err != nil {
 		if errors.Is(err, shared.ErrNoData) {
@@ -81,22 +60,10 @@ func (s *ProductsService) FindProduct(id uint64, username string) (Product, erro
 		return Product{}, shared.ErrInternal
 	}
 
-	if err := tx.Commit(); err != nil {
-		s.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
-		return Product{}, err
-	}
-
 	return product, nil
 }
 
-func (s *ProductsService) UpdateProduct(newProduct Product) (Product, error) {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return Product{}, err
-	}
-	defer tx.Rollback()
-
+func (s *ProductsService) UpdateProduct(tx *sqlx.Tx, newProduct Product) (Product, error) {
 	product, err := s.productsRepo.FindProduct(tx, newProduct.ID)
 	if err != nil {
 		if errors.Is(err, shared.ErrNoData) {
@@ -110,27 +77,10 @@ func (s *ProductsService) UpdateProduct(newProduct Product) (Product, error) {
 		return Product{}, ErrPermissionDenied
 	}
 
-	product, err = s.productsRepo.UpdateProduct(tx, newProduct)
-	if err != nil {
-		return Product{}, err
-	}
-
-	if err := tx.Commit(); err != nil {
-		s.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
-		return Product{}, err
-	}
-
-	return product, nil
+	return s.productsRepo.UpdateProduct(tx, newProduct)
 }
 
-func (s *ProductsService) DeleteProduct(id uint64, username string) error {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return err
-	}
-	defer tx.Rollback()
-
+func (s *ProductsService) DeleteProduct(tx *sqlx.Tx, id uint64, username string) error {
 	product, err := s.productsRepo.FindProduct(tx, id)
 	if err != nil {
 		if errors.Is(err, shared.ErrNoData) {
@@ -144,35 +94,9 @@ func (s *ProductsService) DeleteProduct(id uint64, username string) error {
 		return ErrPermissionDenied
 	}
 
-	if err := s.productsRepo.DeleteProduct(tx, id); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		s.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
-		return err
-	}
-
-	return nil
+	return s.productsRepo.DeleteProduct(tx, id)
 }
 
-func (s *ProductsService) FindProductList(username string, productName string, sortBy SortType) ([]Product, error) {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return nil, err
-	}
-	defer tx.Rollback()
-
-	productList, err := s.productsRepo.FindProductList(tx, username, productName, sortBy)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := tx.Commit(); err != nil {
-		s.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
-		return nil, err
-	}
-
-	return productList, nil
+func (s *ProductsService) FindProductList(tx *sqlx.Tx, username string, productName string, sortBy SortType) ([]Product, error) {
+	return s.productsRepo.FindProductList(tx, username, productName, sortBy)
 }

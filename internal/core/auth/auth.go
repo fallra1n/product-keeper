@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 
 	"github.com/jmoiron/sqlx"
@@ -12,29 +11,20 @@ import (
 )
 
 type AuthService struct {
-	db  *sqlx.DB
 	log *slog.Logger
 
 	authRepo AuthRepo
 }
 
-func NewAuthService(db *sqlx.DB, log *slog.Logger, authRepo AuthRepo) *AuthService {
+func NewAuthService(log *slog.Logger, authRepo AuthRepo) *AuthService {
 	return &AuthService{
-		db:  db,
 		log: log,
 
 		authRepo: authRepo,
 	}
 }
 
-func (s *AuthService) CreateUser(user User) error {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return err
-	}
-	defer tx.Rollback()
-
+func (s *AuthService) CreateUser(tx *sqlx.Tx, user User) error {
 	hash, err := s.hashPassword(user.Password)
 	if err != nil {
 		return err
@@ -52,22 +42,10 @@ func (s *AuthService) CreateUser(user User) error {
 		return err
 	}
 
-	if err := tx.Commit(); err != nil {
-		s.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
-		return err
-	}
-
 	return nil
 }
 
-func (s *AuthService) LoginUser(user User) (string, error) {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		s.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
-		return "", err
-	}
-	defer tx.Rollback()
-
+func (s *AuthService) LoginUser(tx *sqlx.Tx, user User) (string, error) {
 	hashedPassword, err := s.authRepo.FindPassword(tx, user.Name)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
@@ -83,11 +61,6 @@ func (s *AuthService) LoginUser(user User) (string, error) {
 
 	token, err := jwt.GenerateToken(user.Name)
 	if err != nil {
-		return "", err
-	}
-
-	if err := tx.Commit(); err != nil {
-		s.log.Error(fmt.Sprintf("cannot commit transaction: %s", err))
 		return "", err
 	}
 

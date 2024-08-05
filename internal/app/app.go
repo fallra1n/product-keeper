@@ -70,12 +70,12 @@ func NewApp() (*App, error) {
 	a.productsStatistics = productsstatistics.NewKafkaProducts(a.kafkaSyncProducer)
 
 	// services init
-	a.authService = auth.NewAuthService(a.db, a.log, a.authRepo)
-	a.productsService = products.NewProductsService(a.db, a.log, a.productsRepo, a.productsStatistics)
+	a.authService = auth.NewAuthService(a.log, a.authRepo)
+	a.productsService = products.NewProductsService(a.log, a.productsRepo, a.productsStatistics)
 
 	// http handlers init
-	a.authHandler = authhttphandler.NewAuthHandler(a.log, a.authService)
-	a.productsHandler = productshttphandler.NewProductsHandler(a.log, a.productsService)
+	a.authHandler = authhttphandler.NewAuthHandler(a.log, a.db, a.authService)
+	a.productsHandler = productshttphandler.NewProductsHandler(a.log, a.db, a.productsService)
 
 	// http server init
 	router := httphandler.SetupRouter(a.log, a.authHandler, a.productsHandler)

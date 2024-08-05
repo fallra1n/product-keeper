@@ -2,23 +2,27 @@ package authhttphandler
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/fallra1n/product-keeper/internal/core/auth"
 )
 
 type AuthHandler struct {
 	log *slog.Logger
+	db  *sqlx.DB
 
 	authService *auth.AuthService
 }
 
-func NewAuthHandler(log *slog.Logger, authService *auth.AuthService) *AuthHandler {
+func NewAuthHandler(log *slog.Logger, db *sqlx.DB, authService *auth.AuthService) *AuthHandler {
 	return &AuthHandler{
 		log: log,
+		db:  db,
 
 		authService: authService,
 	}
@@ -33,7 +37,15 @@ func (h *AuthHandler) UserRegister(c *gin.Context) {
 		return
 	}
 
-	err := h.authService.CreateUser(auth.User{
+	tx, err := h.db.Beginx()
+	if err != nil {
+		h.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+	defer tx.Rollback()
+
+	err = h.authService.CreateUser(tx, auth.User{
 		Name:     req.Name,
 		Password: req.Password,
 	})
@@ -52,7 +64,12 @@ func (h *AuthHandler) UserRegister(c *gin.Context) {
 		}
 
 		h.log.Error("UserRegister: " + err.Error())
-		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal server error"})
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
 		return
 	}
 
@@ -69,7 +86,15 @@ func (h *AuthHandler) UserLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.LoginUser(auth.User{
+	tx, err := h.db.Beginx()
+	if err != nil {
+		h.log.Error(fmt.Sprintf("cannot start transaction: %s", err))
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+	defer tx.Rollback()
+
+	token, err := h.authService.LoginUser(tx, auth.User{
 		Name:     req.Name,
 		Password: req.Password,
 	})
@@ -88,7 +113,12 @@ func (h *AuthHandler) UserLogin(c *gin.Context) {
 		}
 
 		h.log.Error("UserLogin: " + err.Error())
-		c.JSON(http.StatusInternalServerError, DefaultResponse{"cannot hash password"})
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, DefaultResponse{"internal error"})
 		return
 	}
 
