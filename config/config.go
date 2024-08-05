@@ -37,9 +37,10 @@ type KafkaCluster struct {
 
 // Config application config
 type Config struct {
-	Env          string `yaml:"env"`
+	Env          string   `yaml:"env"`
+	Postgres     Postgres `yaml:"postgres"`
+	PostgresTest Postgres `yaml:"postgres_test"`
 	HTTPServer   `yaml:"http_server"`
-	Postgres     `yaml:"postgres"`
 	KafkaCluster `yaml:"kafka"`
 }
 
