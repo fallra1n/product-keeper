@@ -8,8 +8,16 @@ import (
 
 // PostgresConnect get connection string to postgres
 func PostgresConnect(cfg *config.Config) string {
-	connect := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName)
+	connect := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		cfg.Postgres.Host, cfg.Postgres.Port, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName)
+
+	return connect
+}
+
+// PostgresTestConnect get connection string to postgres for testing
+func PostgresTestConnect(cfg *config.Config) string {
+	connect := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		cfg.PostgresTest.Host, cfg.PostgresTest.Port, cfg.PostgresTest.User, cfg.PostgresTest.Password, cfg.PostgresTest.DBName)
 
 	return connect
 }
