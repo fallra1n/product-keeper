@@ -21,6 +21,7 @@ const (
 	Empty      SortType = ""
 )
 
+// Product info about product
 type Product struct {
 	ID        uint64    `json:"id" db:"id"`
 	Name      string    `json:"name" db:"name"`
@@ -28,4 +29,22 @@ type Product struct {
 	Quantity  uint64    `json:"quantity" db:"quantity"`
 	OwnerName string    `json:"owner_name" db:"owner_name"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+func NewProduct(
+	id uint64,
+	name string,
+	price,
+	quantity uint64,
+	ownerName string,
+	createdAt time.Time,
+) Product {
+	return Product{
+		ID:        id,
+		Name:      name,
+		Price:     price,
+		Quantity:  quantity,
+		OwnerName: ownerName,
+		CreatedAt: createdAt,
+	}
 }
