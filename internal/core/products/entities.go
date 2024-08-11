@@ -6,7 +6,10 @@ import (
 )
 
 var (
-	ErrProductNotFound  = errors.New("product not found")
+	// ErrProductNotFound product not found
+	ErrProductNotFound = errors.New("product not found")
+
+	// ErrPermissionDenied user does not have access to this product
 	ErrPermissionDenied = errors.New("user does not have access to this product")
 )
 

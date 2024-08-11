@@ -5,10 +5,17 @@ import (
 )
 
 var (
+	// ErrFailedHashingPassword failed to hash password
 	ErrFailedHashingPassword = errors.New("failed to hash password")
-	ErrIncorrectPassword     = errors.New("incorrect password")
-	ErrUserNotFound          = errors.New("user not found")
-	ErrUserAlreadyExist      = errors.New("user already exists")
+
+	// ErrIncorrectPassword incorrect password
+	ErrIncorrectPassword = errors.New("incorrect password")
+
+	// ErrUserNotFound user not found
+	ErrUserNotFound = errors.New("user not found")
+
+	// ErrUserAlreadyExist user already exists
+	ErrUserAlreadyExist = errors.New("user already exists")
 )
 
 // User user info for auth
