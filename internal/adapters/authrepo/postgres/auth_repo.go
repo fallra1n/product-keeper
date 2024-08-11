@@ -53,7 +53,7 @@ func (r *AuthRepository) FindPassword(tx *sqlx.Tx, name string) (string, error) 
 
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
-		return "", shared.ErrNoData
+		return "", auth.ErrUserNotFound
 	case err == nil:
 		return user.Password, nil
 	default:

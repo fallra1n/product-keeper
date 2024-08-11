@@ -33,7 +33,7 @@ func (s *Suite) SetupTest() {
 func (s *Suite) TestCreateUser() {
 	mockUser := auth.NewUser("test name", "test password")
 
-	s.Run("Подготовка  данных", func() {
+	s.Run("preparing data", func() {
 		tx, err := s.db.Beginx()
 		s.NoError(err)
 		defer tx.Rollback()
@@ -53,7 +53,7 @@ func (s *Suite) TestCreateUser() {
 		err = s.repo.CreateUser(tx, mockUser)
 		s.NoError(err)
 
-		s.Run("Загрузка  данных", func() {
+		s.Run("checking data", func() {
 			var data string
 			err = tx.QueryRow(sqlQuery, mockUser.Name).Scan(&data)
 			s.NoError(err)
@@ -62,6 +62,30 @@ func (s *Suite) TestCreateUser() {
 			// create a user that already exists
 			err = s.repo.CreateUser(tx, mockUser)
 			s.ErrorIs(err, auth.ErrUserAlreadyExist)
+		})
+	})
+}
+
+func (s *Suite) TestFindPassword() {
+	mockUser := auth.NewUser("test name", "test password")
+
+	s.Run("preparing data", func() {
+		tx, err := s.db.Beginx()
+		s.NoError(err)
+		defer tx.Rollback()
+
+		// create user
+		err = s.repo.CreateUser(tx, mockUser)
+		s.NoError(err)
+
+		s.Run("checking data", func() {
+			// user doesn't exist
+			_, err = s.repo.FindPassword(tx, "doesn't exist")
+			s.ErrorIs(err, auth.ErrUserNotFound)
+
+			data, err := s.repo.FindPassword(tx, mockUser.Name)
+			s.NoError(err)
+			s.Equal(mockUser.Password, data)
 		})
 	})
 }
