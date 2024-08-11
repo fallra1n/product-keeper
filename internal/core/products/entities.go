@@ -13,12 +13,18 @@ var (
 	ErrPermissionDenied = errors.New("user does not have access to this product")
 )
 
+// SortType FindProductList param
 type SortType string
 
 const (
+	// LastCreate sort by created_at
 	LastCreate SortType = "last_create"
-	Name       SortType = "name"
-	Empty      SortType = ""
+
+	// Name sort by name
+	Name SortType = "name"
+
+	// Empty without sorting
+	Empty SortType = ""
 )
 
 // Product info about product

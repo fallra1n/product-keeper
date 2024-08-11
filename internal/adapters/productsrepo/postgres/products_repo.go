@@ -60,10 +60,10 @@ func (r *ProductsRepository) FindProduct(tx *sqlx.Tx, id uint64) (products.Produ
 
 func (r *ProductsRepository) UpdateProduct(tx *sqlx.Tx, newProduct products.Product) (products.Product, error) {
 	sqlQuery := `
-        UPDATE products
-        SET name = $1, price = $2, quantity = $3
-        WHERE id = $4
-        RETURNING *;
+    UPDATE products
+    SET name = $1, price = $2, quantity = $3
+    WHERE id = $4
+    RETURNING *;
 	`
 
 	var data products.Product
