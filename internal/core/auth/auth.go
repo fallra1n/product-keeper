@@ -12,23 +12,26 @@ import (
 )
 
 type AuthService struct {
-	log *slog.Logger
+	log    *slog.Logger
+	crypto shared.Crypto
 
 	authRepo AuthRepo
 }
 
-func NewAuthService(log *slog.Logger, authRepo AuthRepo) *AuthService {
+func NewAuthService(log *slog.Logger, authRepo AuthRepo, crypto shared.Crypto) *AuthService {
 	return &AuthService{
-		log: log,
+		log:    log,
+		crypto: crypto,
 
 		authRepo: authRepo,
 	}
 }
 
 func (s *AuthService) CreateUser(tx *sqlx.Tx, user User) error {
-	hash, err := s.hashPassword(user.Password)
+	hash, err := s.crypto.HashPassword(user.Password)
 	if err != nil {
-		return err
+		s.log.Error("failed to hash password", "error", err.Error())
+		return shared.ErrInternal
 	}
 
 	hashedUser := NewUser(user.Name, hash)
@@ -63,13 +66,4 @@ func (s *AuthService) LoginUser(tx *sqlx.Tx, user User) (string, error) {
 	}
 
 	return token, nil
-}
-
-func (s *AuthService) hashPassword(password string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", ErrFailedHashingPassword
-	}
-
-	return string(hash), nil
 }

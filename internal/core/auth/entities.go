@@ -5,9 +5,6 @@ import (
 )
 
 var (
-	// ErrFailedHashingPassword failed to hash password
-	ErrFailedHashingPassword = errors.New("failed to hash password")
-
 	// ErrIncorrectPassword incorrect password
 	ErrIncorrectPassword = errors.New("incorrect password")
 

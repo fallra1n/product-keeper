@@ -20,10 +20,12 @@ import (
 	"github.com/fallra1n/product-keeper/internal/adapters/productsrepo"
 	"github.com/fallra1n/product-keeper/internal/core/auth"
 	"github.com/fallra1n/product-keeper/internal/core/products"
+	"github.com/fallra1n/product-keeper/internal/core/shared"
 	httphandler "github.com/fallra1n/product-keeper/internal/handler/http"
 	authhttphandler "github.com/fallra1n/product-keeper/internal/handler/http/auth"
 	productshttphandler "github.com/fallra1n/product-keeper/internal/handler/http/products"
 	"github.com/fallra1n/product-keeper/pkg/access"
+	"github.com/fallra1n/product-keeper/pkg/crypto"
 	"github.com/fallra1n/product-keeper/pkg/kafka"
 	"github.com/fallra1n/product-keeper/pkg/logging"
 	"github.com/fallra1n/product-keeper/pkg/postgresdb"
@@ -35,6 +37,7 @@ type App struct {
 	log               *slog.Logger
 	db                *sqlx.DB
 	kafkaSyncProducer sarama.SyncProducer
+	crypto            shared.Crypto
 
 	authRepo           auth.AuthRepo
 	productsRepo       products.ProductsRepo
@@ -62,6 +65,7 @@ func NewApp() (*App, error) {
 		log:               logging.SetupLogger(cfg.Env),
 		db:                postgresdb.NewPostgresDB(access.PostgresConnect(cfg), cfg.Postgres.Timeout),
 		kafkaSyncProducer: kafka.NewSyncProducer(access.KafkaConnect(cfg)),
+		crypto:            crypto.NewCrypto(),
 
 		productsRepo: productsrepo.NewPostgresProducts(),
 		authRepo:     authrepo.NewPostgresAuth(),
@@ -70,7 +74,7 @@ func NewApp() (*App, error) {
 	a.productsStatistics = productsstatistics.NewKafkaProducts(a.kafkaSyncProducer)
 
 	// services init
-	a.authService = auth.NewAuthService(a.log, a.authRepo)
+	a.authService = auth.NewAuthService(a.log, a.authRepo, a.crypto)
 	a.productsService = products.NewProductsService(a.log, a.productsRepo, a.productsStatistics)
 
 	// http handlers init
