@@ -38,6 +38,20 @@ func (m *MockCrypto) EXPECT() *MockCryptoMockRecorder {
 	return m.recorder
 }
 
+// CompareHashAndPassword mocks base method.
+func (m *MockCrypto) CompareHashAndPassword(hashedPassword, password string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CompareHashAndPassword", hashedPassword, password)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CompareHashAndPassword indicates an expected call of CompareHashAndPassword.
+func (mr *MockCryptoMockRecorder) CompareHashAndPassword(hashedPassword, password any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CompareHashAndPassword", reflect.TypeOf((*MockCrypto)(nil).CompareHashAndPassword), hashedPassword, password)
+}
+
 // HashPassword mocks base method.
 func (m *MockCrypto) HashPassword(password string) (string, error) {
 	m.ctrl.T.Helper()

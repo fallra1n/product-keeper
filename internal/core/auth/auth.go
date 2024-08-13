@@ -5,7 +5,6 @@ import (
 	"log/slog"
 
 	"github.com/jmoiron/sqlx"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/fallra1n/product-keeper/internal/core/shared"
 	"github.com/fallra1n/product-keeper/pkg/jwt"
@@ -56,7 +55,7 @@ func (s *AuthService) LoginUser(tx *sqlx.Tx, user User) (string, error) {
 		return "", shared.ErrInternal
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(user.Password)); err != nil {
+	if err := s.crypto.CompareHashAndPassword(hashedPassword, user.Password); err != nil {
 		return "", ErrIncorrectPassword
 	}
 
