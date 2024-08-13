@@ -6,6 +6,23 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type Jwt struct{}
+
+func NewJwt() *Jwt {
+	return &Jwt{}
+}
+
+// GenerateToken generate token
+func (j Jwt) GenerateToken(username string) (string, error) {
+	return GenerateToken(username)
+}
+
+// ParseToken parse token
+func (j Jwt) ParseToken(tokenString string) (string, error) {
+	return ParseToken(tokenString)
+}
+
+// GenerateToken generate token
 func GenerateToken(username string) (string, error) {
 	claims := &tokenClaims{
 		Username: username,
@@ -24,6 +41,7 @@ func GenerateToken(username string) (string, error) {
 	return tokenString, nil
 }
 
+// ParseToken parse token
 func ParseToken(tokenString string) (string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
