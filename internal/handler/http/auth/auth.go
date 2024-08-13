@@ -50,12 +50,6 @@ func (h *AuthHandler) UserRegister(c *gin.Context) {
 	))
 
 	if err != nil {
-		if errors.Is(err, auth.ErrFailedHashingPassword) {
-			h.log.Error("UserRegister: " + err.Error())
-			c.JSON(http.StatusInternalServerError, DefaultResponse{"cannot hash password"})
-			return
-		}
-
 		if errors.Is(err, auth.ErrUserAlreadyExist) {
 			h.log.Error("UserRegister: " + err.Error())
 			c.JSON(http.StatusBadRequest, DefaultResponse{"username already exists"})
