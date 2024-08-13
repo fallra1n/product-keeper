@@ -66,3 +66,56 @@ func (mr *MockCryptoMockRecorder) HashPassword(password any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HashPassword", reflect.TypeOf((*MockCrypto)(nil).HashPassword), password)
 }
+
+// MockJwt is a mock of Jwt interface.
+type MockJwt struct {
+	ctrl     *gomock.Controller
+	recorder *MockJwtMockRecorder
+}
+
+// MockJwtMockRecorder is the mock recorder for MockJwt.
+type MockJwtMockRecorder struct {
+	mock *MockJwt
+}
+
+// NewMockJwt creates a new mock instance.
+func NewMockJwt(ctrl *gomock.Controller) *MockJwt {
+	mock := &MockJwt{ctrl: ctrl}
+	mock.recorder = &MockJwtMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockJwt) EXPECT() *MockJwtMockRecorder {
+	return m.recorder
+}
+
+// GenerateToken mocks base method.
+func (m *MockJwt) GenerateToken(username string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenerateToken", username)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenerateToken indicates an expected call of GenerateToken.
+func (mr *MockJwtMockRecorder) GenerateToken(username any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateToken", reflect.TypeOf((*MockJwt)(nil).GenerateToken), username)
+}
+
+// ParseToken mocks base method.
+func (m *MockJwt) ParseToken(tokenString string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ParseToken", tokenString)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ParseToken indicates an expected call of ParseToken.
+func (mr *MockJwtMockRecorder) ParseToken(tokenString any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseToken", reflect.TypeOf((*MockJwt)(nil).ParseToken), tokenString)
+}
