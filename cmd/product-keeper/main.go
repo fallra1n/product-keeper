@@ -13,7 +13,7 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
-	
+
 	go appl.Run()
 	shutdown.Graceful([]os.Signal{syscall.SIGINT, syscall.SIGTERM}, appl)
 }
