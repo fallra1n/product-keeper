@@ -98,9 +98,9 @@ func (s *RunAuthSuite) TestCreateUser() {
 
 			service := auth.NewAuthService(
 				s.log,
-				f.authRepo,
 				f.crypto,
 				f.jwt,
+				f.authRepo,
 			)
 
 			err := service.CreateUser(f.tx, row.args)
@@ -198,9 +198,9 @@ func (s *RunAuthSuite) TestLoginUser() {
 
 			service := auth.NewAuthService(
 				s.log,
-				f.authRepo,
 				f.crypto,
 				f.jwt,
+				f.authRepo,
 			)
 
 			data, err := service.LoginUser(f.tx, row.args)

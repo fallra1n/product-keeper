@@ -19,15 +19,16 @@ type AuthService struct {
 
 func NewAuthService(
 	log *slog.Logger,
-	authRepo AuthRepo,
 	crypto shared.Crypto,
 	jwt shared.Jwt,
+
+	authRepo AuthRepo,
 ) *AuthService {
 	return &AuthService{
-		log:      log,
-		crypto:   crypto,
-		jwt:      jwt,
-		
+		log:    log,
+		crypto: crypto,
+		jwt:    jwt,
+
 		authRepo: authRepo,
 	}
 }
