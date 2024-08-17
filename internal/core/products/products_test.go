@@ -10,6 +10,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/fallra1n/product-keeper/internal/core/products"
+	"github.com/fallra1n/product-keeper/internal/core/shared"
 	mockproducts "github.com/fallra1n/product-keeper/internal/mocks/products"
 	mockshared "github.com/fallra1n/product-keeper/internal/mocks/shared"
 	"github.com/fallra1n/product-keeper/pkg/logging"
@@ -70,6 +71,27 @@ func (s *RunProductsSuite) TestCreateProduct() {
 			},
 			expectedData: mockProductID,
 			err:          nil,
+		},
+		{
+			name: "unsuccessful launch",
+			prepare: func(f *fields) {
+				mockProduct := products.Product{
+					Name:      "test product",
+					Price:     123,
+					CreatedAt: now,
+				}
+
+				gomock.InOrder(
+					f.date.EXPECT().Now().Return(now),
+					f.productsRepo.EXPECT().CreateProduct(f.tx, mockProduct).Return(uint64(0), products.ErrPermissionDenied),
+				)
+			},
+			args: products.Product{
+				Name:  "test product",
+				Price: 123,
+			},
+			expectedData: uint64(0),
+			err:          shared.ErrInternal,
 		},
 	}
 

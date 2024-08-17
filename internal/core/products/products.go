@@ -39,9 +39,11 @@ func (s *ProductsService) CreateProduct(tx *sqlx.Tx, product Product) (uint64, e
 
 	id, err := s.productsRepo.CreateProduct(tx, product)
 	if err != nil {
-		return 0, err
+		s.log.Error("failed to create product", "error", err.Error())
+		return 0, shared.ErrInternal
 	}
 
+	s.log.Info("product has been created", "id", id)
 	return id, nil
 }
 
