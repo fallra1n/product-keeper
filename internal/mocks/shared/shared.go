@@ -11,6 +11,7 @@ package mockshared
 
 import (
 	reflect "reflect"
+	time "time"
 
 	gomock "go.uber.org/mock/gomock"
 )
@@ -118,4 +119,41 @@ func (m *MockJwt) ParseToken(tokenString string) (string, error) {
 func (mr *MockJwtMockRecorder) ParseToken(tokenString any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseToken", reflect.TypeOf((*MockJwt)(nil).ParseToken), tokenString)
+}
+
+// MockDateTool is a mock of DateTool interface.
+type MockDateTool struct {
+	ctrl     *gomock.Controller
+	recorder *MockDateToolMockRecorder
+}
+
+// MockDateToolMockRecorder is the mock recorder for MockDateTool.
+type MockDateToolMockRecorder struct {
+	mock *MockDateTool
+}
+
+// NewMockDateTool creates a new mock instance.
+func NewMockDateTool(ctrl *gomock.Controller) *MockDateTool {
+	mock := &MockDateTool{ctrl: ctrl}
+	mock.recorder = &MockDateToolMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockDateTool) EXPECT() *MockDateToolMockRecorder {
+	return m.recorder
+}
+
+// Now mocks base method.
+func (m *MockDateTool) Now() time.Time {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Now")
+	ret0, _ := ret[0].(time.Time)
+	return ret0
+}
+
+// Now indicates an expected call of Now.
+func (mr *MockDateToolMockRecorder) Now() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Now", reflect.TypeOf((*MockDateTool)(nil).Now))
 }

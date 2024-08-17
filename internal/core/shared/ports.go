@@ -1,5 +1,9 @@
 package shared
 
+import (
+	"time"
+)
+
 // Crypto interface for working with cryptography
 type Crypto interface {
 	HashPassword(password string) (string, error)
@@ -10,4 +14,9 @@ type Crypto interface {
 type Jwt interface {
 	GenerateToken(username string) (string, error)
 	ParseToken(tokenString string) (string, error)
+}
+
+// DateTool interface for wor working with time
+type DateTool interface {
+	Now() time.Time
 }
