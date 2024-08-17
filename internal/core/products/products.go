@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 
@@ -12,7 +11,8 @@ import (
 )
 
 type ProductsService struct {
-	log *slog.Logger
+	log  *slog.Logger
+	date shared.DateTool
 
 	productsRepo       ProductsRepo
 	productsStatistics ProductsStatistics
@@ -20,18 +20,22 @@ type ProductsService struct {
 
 func NewProductsService(
 	log *slog.Logger,
+	date shared.DateTool,
+
 	productsRepo ProductsRepo,
 	productsStatistics ProductsStatistics,
 ) *ProductsService {
 	return &ProductsService{
-		log:                log,
+		log:  log,
+		date: date,
+
 		productsRepo:       productsRepo,
 		productsStatistics: productsStatistics,
 	}
 }
 
 func (s *ProductsService) CreateProduct(tx *sqlx.Tx, product Product) (uint64, error) {
-	product.CreatedAt = time.Now()
+	product.CreatedAt = s.date.Now()
 
 	id, err := s.productsRepo.CreateProduct(tx, product)
 	if err != nil {

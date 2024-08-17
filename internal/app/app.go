@@ -26,6 +26,7 @@ import (
 	productshttphandler "github.com/fallra1n/product-keeper/internal/handler/http/products"
 	"github.com/fallra1n/product-keeper/pkg/access"
 	"github.com/fallra1n/product-keeper/pkg/crypto"
+	"github.com/fallra1n/product-keeper/pkg/datefunctions"
 	"github.com/fallra1n/product-keeper/pkg/jwt"
 	"github.com/fallra1n/product-keeper/pkg/kafka"
 	"github.com/fallra1n/product-keeper/pkg/logging"
@@ -40,6 +41,7 @@ type App struct {
 	kafkaSyncProducer sarama.SyncProducer
 	crypto            shared.Crypto
 	jwt               shared.Jwt
+	date              shared.DateTool
 
 	authRepo           auth.AuthRepo
 	productsRepo       products.ProductsRepo
@@ -69,6 +71,7 @@ func NewApp() (*App, error) {
 		kafkaSyncProducer: kafka.NewSyncProducer(access.KafkaConnect(cfg)),
 		crypto:            crypto.NewCrypto(),
 		jwt:               jwt.NewJwt(),
+		date:              datefunctions.NewDateTool(),
 
 		productsRepo: productsrepo.NewPostgresProducts(),
 		authRepo:     authrepo.NewPostgresAuth(),
@@ -77,8 +80,8 @@ func NewApp() (*App, error) {
 	a.productsStatistics = productsstatistics.NewKafkaProducts(a.kafkaSyncProducer)
 
 	// services init
-	a.authService = auth.NewAuthService(a.log, a.authRepo, a.crypto, a.jwt)
-	a.productsService = products.NewProductsService(a.log, a.productsRepo, a.productsStatistics)
+	a.authService = auth.NewAuthService(a.log, a.crypto, a.jwt, a.authRepo)
+	a.productsService = products.NewProductsService(a.log, a.date, a.productsRepo, a.productsStatistics)
 
 	// http handlers init
 	a.authHandler = authhttphandler.NewAuthHandler(a.log, a.db, a.authService)
