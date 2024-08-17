@@ -27,6 +27,7 @@ func NewAuthService(
 		log:      log,
 		crypto:   crypto,
 		jwt:      jwt,
+		
 		authRepo: authRepo,
 	}
 }
