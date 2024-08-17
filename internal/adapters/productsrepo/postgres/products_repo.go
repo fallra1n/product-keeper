@@ -10,12 +10,15 @@ import (
 	"github.com/fallra1n/product-keeper/internal/core/shared"
 )
 
+// ProductsRepository ...
 type ProductsRepository struct{}
 
+// NewProducts constructor for ProductsRepository
 func NewProducts() *ProductsRepository {
 	return &ProductsRepository{}
 }
 
+// CreateProduct ...
 func (r *ProductsRepository) CreateProduct(tx *sqlx.Tx, product products.Product) (uint64, error) {
 	sqlQuery := `
 		INSERT INTO products (name, price, quantity, owner_name, created_at) 
@@ -38,6 +41,7 @@ func (r *ProductsRepository) CreateProduct(tx *sqlx.Tx, product products.Product
 	}
 }
 
+// FindProduct ...
 func (r *ProductsRepository) FindProduct(tx *sqlx.Tx, id uint64) (products.Product, error) {
 	sqlQuery := `
 		SELECT * 
@@ -58,6 +62,7 @@ func (r *ProductsRepository) FindProduct(tx *sqlx.Tx, id uint64) (products.Produ
 	}
 }
 
+// UpdateProduct ...
 func (r *ProductsRepository) UpdateProduct(tx *sqlx.Tx, newProduct products.Product) (products.Product, error) {
 	sqlQuery := `
     UPDATE products
@@ -79,6 +84,7 @@ func (r *ProductsRepository) UpdateProduct(tx *sqlx.Tx, newProduct products.Prod
 	}
 }
 
+// DeleteProduct ...
 func (r *ProductsRepository) DeleteProduct(tx *sqlx.Tx, id uint64) error {
 	sqlQuery := `
 		DELETE 
@@ -90,6 +96,7 @@ func (r *ProductsRepository) DeleteProduct(tx *sqlx.Tx, id uint64) error {
 	return err
 }
 
+// FindProductList ...
 func (r *ProductsRepository) FindProductList(tx *sqlx.Tx, username string, productName string, sortBy products.SortType) ([]products.Product, error) {
 	sqlQuery := `
 		SELECT * 

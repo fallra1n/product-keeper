@@ -11,12 +11,15 @@ import (
 	"github.com/fallra1n/product-keeper/internal/core/shared"
 )
 
+// AuthRepository ...
 type AuthRepository struct{}
 
+// NewAuth constructor for AuthRepository
 func NewAuth() *AuthRepository {
 	return &AuthRepository{}
 }
 
+// CreateUser ...
 func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user auth.User) error {
 	sqlQuery := `
 		INSERT INTO auth$users (name, password)
@@ -41,6 +44,7 @@ func (r *AuthRepository) CreateUser(tx *sqlx.Tx, user auth.User) error {
 	return nil
 }
 
+// FindPassword ...
 func (r *AuthRepository) FindPassword(tx *sqlx.Tx, name string) (string, error) {
 	sqlQuery := `
 		SELECT password

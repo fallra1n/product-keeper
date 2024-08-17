@@ -8,16 +8,19 @@ import (
 	"github.com/fallra1n/product-keeper/internal/core/products"
 )
 
+// ProductsStatistics ...
 type ProductsStatistics struct {
 	mq sarama.SyncProducer
 }
 
+// NewProducts constructor for ProductsStatistics
 func NewProducts(mq sarama.SyncProducer) *ProductsStatistics {
 	return &ProductsStatistics{mq: mq}
 }
 
+// Send ...
 func (s *ProductsStatistics) Send(p products.Product) error {
-	pJson, err := json.Marshal(p)
+	pJSON, err := json.Marshal(p)
 	if err != nil {
 		return err
 	}
@@ -25,7 +28,7 @@ func (s *ProductsStatistics) Send(p products.Product) error {
 	msg := sarama.ProducerMessage{
 		Topic:     "products_statistics",
 		Partition: -1,
-		Value:     sarama.ByteEncoder(pJson),
+		Value:     sarama.ByteEncoder(pJSON),
 	}
 
 	if _, _, err := s.mq.SendMessage(&msg); err != nil {

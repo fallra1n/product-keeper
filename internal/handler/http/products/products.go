@@ -14,6 +14,7 @@ import (
 	"github.com/fallra1n/product-keeper/internal/handler/http/middleware"
 )
 
+// ProductsHandler ...
 type ProductsHandler struct {
 	log *slog.Logger
 	db  *sqlx.DB
@@ -21,6 +22,7 @@ type ProductsHandler struct {
 	productsService *products.ProductsService
 }
 
+// NewProductsHandler constructor for ProductsHandler
 func NewProductsHandler(log *slog.Logger, db *sqlx.DB, productsService *products.ProductsService) *ProductsHandler {
 	return &ProductsHandler{
 		log: log,
@@ -30,6 +32,7 @@ func NewProductsHandler(log *slog.Logger, db *sqlx.DB, productsService *products
 	}
 }
 
+// CreateProduct ...
 func (h *ProductsHandler) CreateProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
@@ -75,6 +78,7 @@ func (h *ProductsHandler) CreateProduct(c *gin.Context) {
 	})
 }
 
+// FindProduct ...
 func (h *ProductsHandler) FindProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
@@ -131,6 +135,7 @@ func (h *ProductsHandler) FindProduct(c *gin.Context) {
 	})
 }
 
+// UpdateProduct ...
 func (h *ProductsHandler) UpdateProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
@@ -199,6 +204,7 @@ func (h *ProductsHandler) UpdateProduct(c *gin.Context) {
 	})
 }
 
+// DeleteProduct ...
 func (h *ProductsHandler) DeleteProduct(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {
@@ -248,6 +254,7 @@ func (h *ProductsHandler) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, DefaultResponse{"product has been successfully deleted"})
 }
 
+// FindProductList ..
 func (h *ProductsHandler) FindProductList(c *gin.Context) {
 	username, ok := c.Get(middleware.UserContext)
 	if !ok {

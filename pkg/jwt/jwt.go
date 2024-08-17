@@ -6,8 +6,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// Jwt struct for working with jwt
 type Jwt struct{}
 
+// NewJwt constructor for Jwt
 func NewJwt() *Jwt {
 	return &Jwt{}
 }

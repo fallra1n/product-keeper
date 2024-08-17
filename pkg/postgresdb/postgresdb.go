@@ -5,9 +5,11 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	// need for connecting to db
 	_ "github.com/lib/pq"
 )
 
+// NewPostgresDB getting new postgres db
 func NewPostgresDB(postgresURL string, timeout time.Duration) *sqlx.DB {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()

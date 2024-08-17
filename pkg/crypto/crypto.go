@@ -2,8 +2,10 @@ package crypto
 
 import "golang.org/x/crypto/bcrypt"
 
+// Crypto struct for working with cryptography
 type Crypto struct{}
 
+// NewCrypto constructor for Crypto
 func NewCrypto() *Crypto {
 	return &Crypto{}
 }

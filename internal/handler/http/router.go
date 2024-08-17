@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupRouter ...
 func SetupRouter(log *slog.Logger, auth AuthHandler, productHandlers ProductsHandler) *gin.Engine {
 	router := gin.Default()
 

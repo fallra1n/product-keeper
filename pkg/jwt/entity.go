@@ -9,14 +9,19 @@ import (
 )
 
 const (
+	// TokenTTL token validity period
 	TokenTTL = 20 * time.Minute
 )
 
 var (
-	ErrFailedGenerateToken    = errors.New("failed to generate token")
+	// ErrFailedGenerateToken failed to generate token
+	ErrFailedGenerateToken = errors.New("failed to generate token")
+	// ErrInvalidTokenClaimsType invalid token claims type
 	ErrInvalidTokenClaimsType = errors.New("invalid token claims type")
-	ErrFailedParseToken       = errors.New("failed to parse token")
-	ErrInvalidToken           = errors.New("invalid token")
+	// ErrFailedParseToken failed to parse token
+	ErrFailedParseToken = errors.New("failed to parse token")
+	// ErrInvalidToken invalid token
+	ErrInvalidToken = errors.New("invalid token")
 )
 
 var (

@@ -1,10 +1,13 @@
 package middleware
 
 const (
-	AuthHeader  = "Authorization"
+	// AuthHeader ...
+	AuthHeader = "Authorization"
+	// UserContext ...
 	UserContext = "username"
 )
 
+// DefaultResponse ...
 type DefaultResponse struct {
 	Message string `json:"message"`
 }

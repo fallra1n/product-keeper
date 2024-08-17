@@ -9,6 +9,7 @@ import (
 	"github.com/fallra1n/product-keeper/pkg/jwt"
 )
 
+// UserIdentity ...
 func UserIdentity() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader(AuthHeader)

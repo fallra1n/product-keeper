@@ -7,6 +7,7 @@ import (
 	"os/signal"
 )
 
+// Graceful graceful shutdown
 func Graceful(signals []os.Signal, closeItems ...io.Closer) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, signals...)

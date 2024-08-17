@@ -2,7 +2,6 @@ package products
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 
 	"github.com/jmoiron/sqlx"
@@ -10,6 +9,7 @@ import (
 	"github.com/fallra1n/product-keeper/internal/core/shared"
 )
 
+// ProductsService ...
 type ProductsService struct {
 	log  *slog.Logger
 	date shared.DateTool
@@ -18,6 +18,7 @@ type ProductsService struct {
 	productsStatistics ProductsStatistics
 }
 
+// NewProductsService ...
 func NewProductsService(
 	log *slog.Logger,
 	date shared.DateTool,
@@ -34,12 +35,13 @@ func NewProductsService(
 	}
 }
 
+// CreateProduct ...
 func (s *ProductsService) CreateProduct(tx *sqlx.Tx, product Product) (uint64, error) {
 	product.CreatedAt = s.date.Now()
 
 	id, err := s.productsRepo.CreateProduct(tx, product)
 	if err != nil {
-		s.log.Error("failed to create product", "error", err.Error())
+		s.log.Error("failed to create product", "error", err)
 		return 0, shared.ErrInternal
 	}
 
@@ -47,9 +49,12 @@ func (s *ProductsService) CreateProduct(tx *sqlx.Tx, product Product) (uint64, e
 	return id, nil
 }
 
+// FindProduct ...
 func (s *ProductsService) FindProduct(tx *sqlx.Tx, id uint64, username string) (Product, error) {
 	product, err := s.productsRepo.FindProduct(tx, id)
 	if err != nil {
+		s.log.Error("failed to find product by id", "error", err, "id", id)
+
 		if errors.Is(err, shared.ErrNoData) {
 			return Product{}, ErrProductNotFound
 		}
@@ -58,17 +63,20 @@ func (s *ProductsService) FindProduct(tx *sqlx.Tx, id uint64, username string) (
 	}
 
 	if product.OwnerName != username {
+		s.log.Error(ErrPermissionDenied.Error(), "username", username, "id", id, "ownername", product.OwnerName)
+
 		return Product{}, ErrPermissionDenied
 	}
 
 	if err := s.productsStatistics.Send(product); err != nil {
-		s.log.Error(fmt.Sprintf("cannot send product view to statistics: %s", err))
+		s.log.Error("failed to send product view to statistics", "error", err, "id", id)
 		return Product{}, shared.ErrInternal
 	}
 
 	return product, nil
 }
 
+// UpdateProduct ...
 func (s *ProductsService) UpdateProduct(tx *sqlx.Tx, newProduct Product) (Product, error) {
 	product, err := s.productsRepo.FindProduct(tx, newProduct.ID)
 	if err != nil {
@@ -86,6 +94,7 @@ func (s *ProductsService) UpdateProduct(tx *sqlx.Tx, newProduct Product) (Produc
 	return s.productsRepo.UpdateProduct(tx, newProduct)
 }
 
+// DeleteProduct ...
 func (s *ProductsService) DeleteProduct(tx *sqlx.Tx, id uint64, username string) error {
 	product, err := s.productsRepo.FindProduct(tx, id)
 	if err != nil {
@@ -103,6 +112,7 @@ func (s *ProductsService) DeleteProduct(tx *sqlx.Tx, id uint64, username string)
 	return s.productsRepo.DeleteProduct(tx, id)
 }
 
+// FindProductList ...
 func (s *ProductsService) FindProductList(tx *sqlx.Tx, username string, productName string, sortBy SortType) ([]Product, error) {
 	return s.productsRepo.FindProductList(tx, username, productName, sortBy)
 }

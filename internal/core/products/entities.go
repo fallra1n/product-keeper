@@ -37,6 +37,7 @@ type Product struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
+// NewProduct constructor for Product
 func NewProduct(
 	id uint64,
 	name string,

@@ -12,6 +12,7 @@ import (
 	"github.com/fallra1n/product-keeper/internal/core/auth"
 )
 
+// AuthHandler ...
 type AuthHandler struct {
 	log *slog.Logger
 	db  *sqlx.DB
@@ -19,6 +20,7 @@ type AuthHandler struct {
 	authService *auth.AuthService
 }
 
+// NewAuthHandler constructor for AuthHandler
 func NewAuthHandler(log *slog.Logger, db *sqlx.DB, authService *auth.AuthService) *AuthHandler {
 	return &AuthHandler{
 		log: log,
@@ -28,6 +30,7 @@ func NewAuthHandler(log *slog.Logger, db *sqlx.DB, authService *auth.AuthService
 	}
 }
 
+// UserRegister ...
 func (h *AuthHandler) UserRegister(c *gin.Context) {
 	var req AuthRequest
 
@@ -70,6 +73,7 @@ func (h *AuthHandler) UserRegister(c *gin.Context) {
 	c.JSON(http.StatusOK, DefaultResponse{"a user has been successfully registered"})
 }
 
+// UserLogin ...
 func (h *AuthHandler) UserLogin(c *gin.Context) {
 	var req AuthRequest
 

@@ -6,10 +6,13 @@ import (
 )
 
 const (
+	// EnvLocal local environment
 	EnvLocal = "local"
-	EnvProd  = "prod"
+	// EnvProd prod environment
+	EnvProd = "prod"
 )
 
+// SetupLogger getting new logger
 func SetupLogger(env string) *slog.Logger {
 	var logger *slog.Logger
 

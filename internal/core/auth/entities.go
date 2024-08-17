@@ -21,6 +21,7 @@ type User struct {
 	Password string `db:"password"`
 }
 
+// NewUser constructor for User
 func NewUser(name string, password string) User {
 	return User{
 		Name:     name,
