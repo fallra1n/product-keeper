@@ -260,3 +260,126 @@ func (s *RunProductsSuite) TestFindProduct() {
 		})
 	}
 }
+
+func (s *RunProductsSuite) TestUpdateProduct() {
+	type fields struct {
+		tx   *sqlx.Tx
+		date *mockshared.MockDateTool
+
+		productsRepo       *mockproducts.MockProductsRepo
+		productsStatistics *mockproducts.MockProductsStatistics
+	}
+
+	var (
+		mockProductID = uint64(123)
+		mockUsername  = "test new username"
+	)
+
+	testList := []struct {
+		name         string
+		prepare      func(f *fields)
+		args         products.Product
+		expectedData products.Product
+		err          error
+	}{
+		{
+			name: "successful launch",
+			prepare: func(f *fields) {
+				mockProduct := products.Product{
+					ID:        mockProductID,
+					OwnerName: mockUsername,
+					Name:      "test product",
+					Price:     123,
+				}
+
+				mockNewProduct := products.Product{
+					ID:        mockProductID,
+					OwnerName: mockUsername,
+					Name:      "new test product",
+					Price:     1234,
+				}
+
+				gomock.InOrder(
+					f.productsRepo.EXPECT().FindProduct(f.tx, mockProductID).Return(mockProduct, nil),
+					f.productsRepo.EXPECT().UpdateProduct(f.tx, mockNewProduct).Return(mockNewProduct, nil),
+				)
+			},
+			args: products.Product{
+				ID:        mockProductID,
+				OwnerName: mockUsername,
+				Name:      "new test product",
+				Price:     1234,
+			},
+			expectedData: products.Product{
+				ID:        mockProductID,
+				OwnerName: mockUsername,
+				Name:      "new test product",
+				Price:     1234,
+			},
+			err: nil,
+		},
+		{
+			name: "product not found",
+			prepare: func(f *fields) {
+				gomock.InOrder(
+					f.productsRepo.EXPECT().FindProduct(f.tx, mockProductID).Return(products.Product{}, shared.ErrNoData),
+				)
+			},
+			args: products.Product{
+				ID:        mockProductID,
+				OwnerName: mockUsername,
+			},
+			expectedData: products.Product{},
+			err:          products.ErrProductNotFound,
+		},
+		{
+			name: "permission denied",
+			prepare: func(f *fields) {
+				mockProduct := products.Product{
+					ID:        mockProductID,
+					OwnerName: "other username",
+				}
+
+				gomock.InOrder(
+					f.productsRepo.EXPECT().FindProduct(f.tx, mockProductID).Return(mockProduct, nil),
+				)
+			},
+			args: products.Product{
+				ID:        mockProductID,
+				OwnerName: mockUsername,
+			},
+			expectedData: products.Product{},
+			err:          products.ErrPermissionDenied,
+		},
+	}
+
+	for _, row := range testList {
+		s.Run(row.name, func() {
+			ctrl := gomock.NewController(s.T())
+			defer ctrl.Finish()
+
+			f := fields{
+				tx:   &sqlx.Tx{},
+				date: mockshared.NewMockDateTool(ctrl),
+
+				productsRepo:       mockproducts.NewMockProductsRepo(ctrl),
+				productsStatistics: mockproducts.NewMockProductsStatistics(ctrl),
+			}
+			if row.prepare != nil {
+				row.prepare(&f)
+			}
+
+			service := products.NewProductsService(
+				s.log,
+				f.date,
+
+				f.productsRepo,
+				f.productsStatistics,
+			)
+
+			data, err := service.UpdateProduct(f.tx, row.args)
+			s.Equal(row.err, err)
+			s.Equal(row.expectedData, data)
+		})
+	}
+}

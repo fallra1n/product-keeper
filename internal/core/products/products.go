@@ -54,7 +54,6 @@ func (s *ProductsService) FindProduct(tx *sqlx.Tx, id uint64, username string) (
 	product, err := s.productsRepo.FindProduct(tx, id)
 	if err != nil {
 		s.log.Error("failed to find product by id", "error", err, "id", id)
-
 		if errors.Is(err, shared.ErrNoData) {
 			return Product{}, ErrProductNotFound
 		}
@@ -64,7 +63,6 @@ func (s *ProductsService) FindProduct(tx *sqlx.Tx, id uint64, username string) (
 
 	if product.OwnerName != username {
 		s.log.Error(ErrPermissionDenied.Error(), "username", username, "id", id, "ownername", product.OwnerName)
-
 		return Product{}, ErrPermissionDenied
 	}
 
@@ -80,6 +78,7 @@ func (s *ProductsService) FindProduct(tx *sqlx.Tx, id uint64, username string) (
 func (s *ProductsService) UpdateProduct(tx *sqlx.Tx, newProduct Product) (Product, error) {
 	product, err := s.productsRepo.FindProduct(tx, newProduct.ID)
 	if err != nil {
+		s.log.Error("failed to find product by id", "error", err, "id", newProduct.ID)
 		if errors.Is(err, shared.ErrNoData) {
 			return Product{}, ErrProductNotFound
 		}
@@ -88,10 +87,17 @@ func (s *ProductsService) UpdateProduct(tx *sqlx.Tx, newProduct Product) (Produc
 	}
 
 	if product.OwnerName != newProduct.OwnerName {
+		s.log.Error(ErrPermissionDenied.Error(), "username", newProduct.OwnerName, "id", newProduct.ID, "ownername", product.OwnerName)
 		return Product{}, ErrPermissionDenied
 	}
 
-	return s.productsRepo.UpdateProduct(tx, newProduct)
+	data, err := s.productsRepo.UpdateProduct(tx, newProduct)
+	if err != nil {
+		s.log.Error("failed to update product", "error", err, "id", newProduct.ID)
+		return Product{}, shared.ErrInternal
+	}
+
+	return data, nil
 }
 
 // DeleteProduct ...
