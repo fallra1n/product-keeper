@@ -58,7 +58,7 @@ func (s *ProductsService) FindProduct(tx *sqlx.Tx, id uint64, username string) (
 			return Product{}, ErrProductNotFound
 		}
 
-		return Product{}, err
+		return Product{}, shared.ErrInternal
 	}
 
 	if product.OwnerName != username {
@@ -83,7 +83,7 @@ func (s *ProductsService) UpdateProduct(tx *sqlx.Tx, newProduct Product) (Produc
 			return Product{}, ErrProductNotFound
 		}
 
-		return Product{}, err
+		return Product{}, shared.ErrInternal
 	}
 
 	if product.OwnerName != newProduct.OwnerName {
@@ -104,21 +104,38 @@ func (s *ProductsService) UpdateProduct(tx *sqlx.Tx, newProduct Product) (Produc
 func (s *ProductsService) DeleteProduct(tx *sqlx.Tx, id uint64, username string) error {
 	product, err := s.productsRepo.FindProduct(tx, id)
 	if err != nil {
+		s.log.Error("failed to find product by id", "error", err, "id", id)
 		if errors.Is(err, shared.ErrNoData) {
 			return ErrProductNotFound
 		}
 
-		return err
+		return shared.ErrInternal
 	}
 
 	if product.OwnerName != username {
+		s.log.Error(ErrPermissionDenied.Error(), "username", username, "id", id, "ownername", product.OwnerName)
 		return ErrPermissionDenied
 	}
 
-	return s.productsRepo.DeleteProduct(tx, id)
+	if err := s.productsRepo.DeleteProduct(tx, id); err != nil {
+		s.log.Error("failed to delete product", "error", err, "id", id)
+		return shared.ErrInternal
+	}
+
+	return nil
 }
 
 // FindProductList ...
 func (s *ProductsService) FindProductList(tx *sqlx.Tx, username string, productName string, sortBy SortType) ([]Product, error) {
-	return s.productsRepo.FindProductList(tx, username, productName, sortBy)
+	data, err := s.productsRepo.FindProductList(tx, username, productName, sortBy)
+	if err != nil {
+		s.log.Error("failed to find product list", "error", err, "username", username, "productName", productName, "sortBy", sortBy)
+		if errors.Is(err, shared.ErrNoData) {
+			return nil, ErrProductListNotFound
+		}
+
+		return nil, shared.ErrInternal
+	}
+
+	return data, nil
 }

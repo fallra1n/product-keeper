@@ -9,6 +9,9 @@ var (
 	// ErrProductNotFound product not found
 	ErrProductNotFound = errors.New("product not found")
 
+	// ErrProductListNotFound product list not found
+	ErrProductListNotFound = errors.New("product list not found")
+
 	// ErrPermissionDenied user does not have access to this product
 	ErrPermissionDenied = errors.New("user does not have access to this product")
 )
