@@ -5,6 +5,12 @@ Set env variables CONFIG_PATH and JWT_SECRET before run:
 CONFIG_PATH=config/local.yaml
 JWT_SECRET=qwerty
 ```
+* Generate certificates:
+
+```shell
+openssl req -x509 -newkey rsa:4096 -keyout .cert/key.pem -out .cert/cert.pem -days 365 -nodes -config config/localhost.cnf
+```
+
 
 ```shell
 make run
@@ -16,23 +22,23 @@ After apply all migrations from folder [migrations](migrations/).
 
 * User registration:
     ```shell
-    curl -X POST \
+    curl --cacert .cert/cert.pem -X POST \
     -H "Content-Type: application/json" \
     -d '{"username":"${USERNAME?}","password":"${PASSWORD?}"}' \
-    'http://localhost:8080/user/register'
+    'https://localhost:8080/user/register'
     ```
 
 * Login:
     ```shell
-    curl -X POST \
+    curl --cacert .cert/cert.pem -X POST \
     -H "Content-Type: application/json" \
     -d '{"username":"${USERNAME?}","password":"${PASSWORD?}"}' \
-    'http://localhost:8080/user/login'
+    'https://localhost:8080/user/login'
     ```
 
 * Create a product:
     ```shell
-    curl -X 'POST' \
+    curl --cacert .cert/cert.pem -X 'POST' \
     -H 'Content-Type: application/json' \
     -H 'Authorization: Bearer ${TOKEN?}' \
     -d '{
@@ -40,20 +46,20 @@ After apply all migrations from folder [migrations](migrations/).
     "price": 42,
     "quantity": 42
     }' \
-    'http://localhost:8080/product/add'
+    'https://localhost:8080/product/add'
     ```
 
 * Get product by id:
     ```shell
-    curl -X 'GET' \
+    curl --cacert .cert/cert.pem -X 'GET' \
     -H 'Content-Type: application/json' \
     -H 'Authorization: Bearer ${TOKEN?}' \
-    'http://localhost:8080/product/${ID?}
+    'https://localhost:8080/product/${ID?}
     ```
 
 * Update product by id:
     ```shell
-    curl -X 'PUT' \
+    curl --cacert .cert/cert.pem -X 'PUT' \
     -H 'Content-Type: application/json' \
     -H 'Authorization: Bearer ${TOKEN?}' \
     -d '{
@@ -61,22 +67,22 @@ After apply all migrations from folder [migrations](migrations/).
       "price": 43,
       "quantity": 43
     }' \
-    'http://localhost:8080/product/${ID?}'
+    'https://localhost:8080/product/${ID?}'
     ```
   
 * Delete product by id:
     ```shell
-    curl -X 'DELETE' \
+    curl --cacert .cert/cert.pem -X 'DELETE' \
     -H 'Content-Type: application/json' \
     -H 'Authorization: Bearer ${TOKEN?}' \
-    'http://localhost:8080/product/${ID?}'
+    'https://localhost:8080/product/${ID?}'
     ```
   
 * Get all products:
     ```shell
-    curl -X 'GET' \
+    curl --cacert .cert/cert.pem -X 'GET' \
     -H 'Content-Type: application/json' \
     -H 'Authorization: Bearer ${TOKEN?}' \
-    'http://localhost:8080/products?name=aaaaaaaaaaaa&sort_by=last_create'
+    'https://localhost:8080/products?name=aaaaaaaaaaaa&sort_by=last_create'
     ```
   

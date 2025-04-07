@@ -7,6 +7,12 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
+// SSLPath ssl certs path
+type SSLPath struct {
+	Certfile string `yaml:"certfile"`
+	Keyfile  string `yaml:"keyfile"`
+}
+
 // HTTPServer server parameters
 type HTTPServer struct {
 	Port    string        `yaml:"port"`
@@ -40,6 +46,7 @@ type Config struct {
 	Env          string   `yaml:"env"`
 	Postgres     Postgres `yaml:"postgres"`
 	PostgresTest Postgres `yaml:"postgres_test"`
+	SSLPath      `yaml:"ssl_path"`
 	HTTPServer   `yaml:"http_server"`
 	KafkaCluster `yaml:"kafka"`
 }
