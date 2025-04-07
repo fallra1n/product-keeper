@@ -101,7 +101,7 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Run() {
-	if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err := a.httpServer.ListenAndServeTLS(a.cfg.SSLPath.Certfile, a.cfg.SSLPath.Keyfile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		a.log.Error(fmt.Sprintf("error ocurred while running http-server server: %s", err))
 		os.Exit(1)
 	}
