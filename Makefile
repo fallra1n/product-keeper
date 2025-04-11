@@ -16,9 +16,9 @@ test_adapter: no_test_cache
 	./scripts/run_test_adapter.sh
 
 build:
-	cd deployment && docker compose build --no-cache
+	cd deployment && docker compose build --no-cache --build-arg JWT_SECRET=${JWT_SECRET} --build-arg CONFIG_PATH=${CONFIG_PATH}
 
 run: test_core test_adapter build
-	cd deployment && docker compose -p ${NAME} up --force-recreate --remove-orphans --build
+	cd deployment && docker compose -p ${NAME} up --force-recreate --remove-orphans
 
 .PHONY: no_test_cache

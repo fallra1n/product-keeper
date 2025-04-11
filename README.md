@@ -1,10 +1,5 @@
 ## Run
 
-Set env variables CONFIG_PATH and JWT_SECRET before run:
-```shell
-CONFIG_PATH=config/local.yaml
-JWT_SECRET=qwerty
-```
 * Generate certificates:
 
 ```shell
@@ -13,6 +8,10 @@ openssl req -x509 -newkey rsa:4096 -keyout .cert/key.pem -out .cert/cert.pem -da
 
 
 ```shell
+export JWT_SECRET=your_super_secret_key
+export CONFIG_PATH=config/local.yaml
+
+make build
 make run
 ```
 
