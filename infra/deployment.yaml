@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: product-keeper
-        image: product-keeper:latest
-        imagePullPolicy: Never
+        image: cr.yandex/crp66p03h30r3ekibrbe/product-keeper:v1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
@@ -25,3 +25,5 @@ spec:
           value: "your-jwt-secret-key"
         - name: CONFIG_PATH
           value: config/local.yaml
+      imagePullSecrets:
+      - name: yc-registry-secret
