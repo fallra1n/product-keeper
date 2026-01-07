@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-keeper-service
+  labels:
+    app: product-keeper
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30080  # Порт для доступа извне minikube
+  selector:
+    app: product-keeper

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-keeper
+  labels:
+    app: product-keeper
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: product-keeper
+  template:
+    metadata:
+      labels:
+        app: product-keeper
+    spec:
+      containers:
+      - name: product-keeper
+        image: product-keeper:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: JWT_SECRET
+          value: "your-jwt-secret-key"
+        - name: CONFIG_PATH
+          value: config/local.yaml
