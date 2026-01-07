@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: product-keeper
+  namespace: test
   labels:
     app: product-keeper
 spec:
