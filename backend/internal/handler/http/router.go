@@ -11,6 +11,9 @@ import (
 func SetupRouter(log *slog.Logger, auth AuthHandler, productHandlers ProductsHandler) *gin.Engine {
 	router := gin.Default()
 
+	// Добавляем CORS middleware
+	router.Use(middleware.CORS())
+
 	// TODO using custom logger
 
 	router.POST("/user/register", auth.UserRegister)
