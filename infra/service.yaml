@@ -6,10 +6,10 @@ metadata:
   labels:
     app: product-keeper
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
     - protocol: TCP
-      port: 80
+      port: 8080
       targetPort: 8080
       nodePort: 30080
   selector:
