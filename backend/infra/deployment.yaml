@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: product-keeper
-        image: cr.yandex/crp66p03h30r3ekibrbe/product-keeper:v1.0.1
+        image: cr.yandex/crp66p03h30r3ekibrbe/product-keeper:v1.0.2
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
