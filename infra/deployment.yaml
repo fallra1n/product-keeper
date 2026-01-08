@@ -25,6 +25,6 @@ spec:
         - name: JWT_SECRET
           value: "your-jwt-secret-key"
         - name: CONFIG_PATH
-          value: config/local.yaml
+          value: config/test.yaml
       imagePullSecrets:
       - name: yc-registry-secret

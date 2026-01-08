@@ -27,7 +27,7 @@ function apply_migrations() {
   ./scripts/apply_migration.sh 1
 }
 
-cd deployment
+cd infra
 setup_db
 cd ..
 
