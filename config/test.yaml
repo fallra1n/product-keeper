@@ -20,4 +20,4 @@ kafka:
   replication_factor: 1
   brokers:
     - host: "89.169.177.19"
-      port: "9092"
+      port: "9094"

@@ -35,18 +35,21 @@ services:
     image: wurstmeister/kafka
     container_name: kafka
     ports:
-      - "9095:9094"
+      - "9092:9092"
+      - "9094:9094"
     depends_on:
       - zookeeper
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_LISTENERS: INTERNAL://kafka-1:9092,OUTSIDE://localhost:9094
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9092,OUTSIDE://localhost:9095
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9092,EXTERNAL://${KAFKA_EXTERNAL_HOST:-localhost}:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_LOG_DIRS: /kafka/logs
-      KAFKA_offsets_topic_replication_factor: 3
-      KAFKA_BROKER_ID: 500
+      KAFKA_offsets_topic_replication_factor: 1
+      KAFKA_BROKER_ID: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
 
   kafka-ui:
     container_name: kafka-ui
