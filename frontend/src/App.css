@@ -380,24 +380,36 @@ h3 {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0;
-  position: sticky;
+  padding: 0 20px;
+  position: static;
   top: 0;
   z-index: 100;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
-  width: 100%;
+  max-width: 1560.75px;
+  border-radius: 0 0 20px 20px;
+  box-sizing: border-box;
 }
 
 .navbar-container {
-  max-width: 1200px;
+  max-width: 1560.75px;
+  min-width: 1200px;
   padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 70px;
-  width: 100%;
+  border-radius: 0 0 20px 20px;
+}
+
+.navbar-container {
+  max-width: 1560.75px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
 }
 
 .navbar-brand {
