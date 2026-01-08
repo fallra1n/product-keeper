@@ -1,22 +1,4 @@
 services:
-  product_keeper:
-    image: product-keeper:1.0.0
-    build:
-      context: ..
-      dockerfile: ./infra/Dockerfile
-      args:
-        JWT_SECRET: ${JWT_SECRET}
-        CONFIG_PATH: ${CONFIG_PATH}
-    command: ./product-keeper
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-      - kafka-1
-    environment:
-      - JWT_SECRET=${JWT_SECRET}
-      - CONFIG_PATH=${CONFIG_PATH}
-
   db:
     container_name: postgres
     image: postgres:latest

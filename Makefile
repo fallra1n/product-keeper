@@ -18,7 +18,12 @@ test_adapter: no_test_cache
 build:
 	cd infra && docker compose build --no-cache --build-arg JWT_SECRET=${JWT_SECRET} --build-arg CONFIG_PATH=${CONFIG_PATH}
 
+# Run only infrastructure (postgres and kafka)
+run-infra:
+	cd infra && docker compose -f docker-compose.infra.yaml -p ${NAME}-infra up --force-recreate --remove-orphans
+
+# Run everything (original behavior)
 run: test_core test_adapter build
 	cd infra && docker compose -p ${NAME} up --force-recreate --remove-orphans
 
-.PHONY: no_test_cache
+.PHONY: no_test_cache run-infra
