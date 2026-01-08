@@ -1,9 +1,5 @@
 env: "local"
 
-ssl_path:
-  certfile: ".cert/cert.pem"
-  keyfile: ".cert/key.pem"
-
 http_server:
   port: "8080"
   timeout: 5s

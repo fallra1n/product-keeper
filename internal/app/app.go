@@ -101,7 +101,18 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Run() {
-	if err := a.httpServer.ListenAndServeTLS(a.cfg.SSLPath.Certfile, a.cfg.SSLPath.Keyfile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	var err error
+	
+	// Check if SSL certificates are configured
+	if a.cfg.SSLPath.Certfile != "" && a.cfg.SSLPath.Keyfile != "" {
+		a.log.Info("Starting HTTPS server")
+		err = a.httpServer.ListenAndServeTLS(a.cfg.SSLPath.Certfile, a.cfg.SSLPath.Keyfile)
+	} else {
+		a.log.Info("Starting HTTP server")
+		err = a.httpServer.ListenAndServe()
+	}
+	
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		a.log.Error(fmt.Sprintf("error ocurred while running http-server server: %s", err))
 		os.Exit(1)
 	}
