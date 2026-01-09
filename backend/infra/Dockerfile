@@ -18,6 +18,5 @@ ENV CONFIG_PATH=${CONFIG_PATH}
 
 COPY --from=builder /app/product-keeper ./
 COPY --from=builder /app/config ./config/
-COPY --from=builder /app/.cert ./.cert/
 
 CMD ["./product-keeper"]
