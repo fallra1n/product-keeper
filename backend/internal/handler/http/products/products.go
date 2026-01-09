@@ -55,7 +55,7 @@ func (h *ProductsHandler) CreateProduct(c *gin.Context) {
 	defer tx.Rollback()
 
 	id, err := h.productsService.CreateProduct(tx, products.Product{
-		Name:      req.Name+"-test",
+		Name:      req.Name,
 		Price:     req.Price,
 		Quantity:  req.Quantity,
 		OwnerName: username.(string),
