@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths: ['backend/**', '.github/**']
-    
+
 env:
   REGISTRY: cr.yandex/crp66p03h30r3ekibrbe
   IMAGE_NAME: product-keeper
@@ -65,7 +65,7 @@ jobs:
           chmod 600 $HOME/.kube/config
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f backend/infra/deployment.yaml -n test
+          kubectl apply -f infra/deployment.yaml -n test
           kubectl rollout restart deployment/product-keeper -n test
           kubectl rollout status deployment/product-keeper -n test --timeout=300s
       - name: Verify deployment
